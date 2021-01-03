@@ -27,14 +27,14 @@ const contentMappingOptions = {
     }
 };
 
-const getItemHtml = (entry) => {
+const buildItemHtml = (entry) => {
     return `<li><h3 class="title">${entry.title}</h3> <span class="info">@${entry.date} <a href="${entry.url}">${entry.id}</a></span> <p class="content">${entry.content}</p></li>`;
 }
 
-const getListHtml = (username, page, maxPage, entries) => {
+const buildPageHtml = (username, page, maxPage, entries) => {
     const nextFilename = `e_${page + 1}.html`;
     const previousFilename = `e_${page - 1}.html`;
-    const items = entries.map(entry => getItemHtml(entry));
+    const items = entries.map(entry => buildItemHtml(entry));
 
     return `<!DOCTYPE html>
     <html data-version="${global.__app_version}">
@@ -65,7 +65,7 @@ const getListHtml = (username, page, maxPage, entries) => {
 const write = (username, page, maxPage, entries) => {
     const userFolder = path.join('./', username);
     const currentFilename = `e_${page}.html`;
-    const html = getListHtml(username, page, maxPage, entries);
+    const html = buildPageHtml(username, page, maxPage, entries);
 
     if (!fs.existsSync(userFolder)) {
         fs.mkdirSync(userFolder)
@@ -91,7 +91,7 @@ const parsePage = async (username, page) => {
     };
 };
 
-const saveUserEntries = async (options, onProgressUpdated) => {
+const downloadUserEntries = async (options, onProgressUpdated) => {
     options.startPage = options.startPage || 1;
     let currentPage = options.startPage;
     options.maxPage = currentPage + 1;
@@ -123,4 +123,4 @@ const saveUserEntries = async (options, onProgressUpdated) => {
     }
 };
 
-module.exports = { saveUserEntries, write };
+module.exports = { downloadUserEntries, write, buildPageHtml };

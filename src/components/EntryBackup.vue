@@ -46,8 +46,8 @@
           <div v-if="inProgress">
             <p class="my-4">
               <span
-                >sayfa # {{ progress.currentPage }} /
-                {{ progress.maxPage }} - {{ progress.entryCount }} entry</span
+                >sayfa # {{ progress.currentPage }} / {{ progress.maxPage }} -
+                {{ progress.entryCount }} entry</span
               >
             </p>
 
@@ -70,7 +70,7 @@
 </template>
 
 <script>
-import { saveUserEntries } from "../parser";
+import { downloadUserEntries, buildPageHtml } from "../parser";
 
 const _domains = [
   {
@@ -125,7 +125,7 @@ export default {
       this.resetProgress();
       this.inProgress = !this.inProgress;
 
-      saveUserEntries(
+      downloadUserEntries(
         {
           username: this.username,
           pageLength: 4,
@@ -142,11 +142,32 @@ export default {
         data
       );
 
+      const currentFilename = `e_${this.progress.currentPage}.html`;
+
+      const pageHtml = buildPageHtml(
+        this.username,
+        this.progress.currentPage,
+        this.progress.maxPage,
+        this.progress.entries
+      );
+
+      this.downloadFile(currentFilename, pageHtml);
+
       if (this.progress.currentPage === this.progress.maxPage) {
         this.inProgress = false;
         this.resetProgress();
         this.isCompleted = true;
       }
+    },
+
+    downloadFile(title, data) {
+      console.log(title);
+      const url = window.URL.createObjectURL(new Blob([data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", title);
+      document.body.appendChild(link);
+      link.click();
     },
   },
 };
