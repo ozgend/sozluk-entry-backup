@@ -1,6 +1,6 @@
 <template>
   <div>
-    <section class="hero is-fullheight is-dark is-bold is-large">
+    <section class="hero is-fullheight-with-navbar is-dark is-bold is-large">
       <div class="hero-body">
         <div class="container">
           <h1 class="title is-size-2 my-4">entry yedekleme aparatı</h1>
@@ -47,7 +47,7 @@
             <p class="my-4">
               <span
                 >sayfa # {{ progress.currentPage }} /
-                {{ progress.maxPage }}</span
+                {{ progress.maxPage }} - {{ progress.entryCount }} entry</span
               >
             </p>
 
@@ -61,7 +61,7 @@
           </div>
 
           <div v-if="isCompleted">
-            <p class="my-2">... tamamlandi.</p>
+            <p class="my-2">{{ progress.entryCount }} entry tamamlandı.</p>
           </div>
         </div>
       </div>
@@ -81,19 +81,22 @@ const _domains = [
   },
 ];
 
+const _progress = {
+  currentPage: 0,
+  maxPage: 0,
+  value: 0,
+  entryCount: 0,
+};
+
 export default {
   name: "EntryBackup",
   data: function () {
     return {
       inProgress: false,
       isCompleted: false,
-      progress: {
-        currentPage: 0,
-        maxPage: 0,
-        value: 0,
-      },
+      progress: Object.assign({}, _progress),
       domains: _domains,
-      selectedDomainId: null,
+      selectedDomainId: "uludag",
       username: null,
     };
   },
@@ -114,7 +117,12 @@ export default {
     },
   },
   methods: {
+    resetProgress() {
+      Object.assign({}, _progress);
+    },
+
     getUserEntries() {
+      this.resetProgress();
       this.inProgress = !this.inProgress;
 
       saveUserEntries(
@@ -127,12 +135,16 @@ export default {
     },
 
     onProgressUpdated(data) {
-      this.progress.value = (data.currentPage * 100) / data.maxPage;
-      this.progress.maxPage = data.maxPage;
-      this.progress.currentPage = data.currentPage;
+      this.progress = Object.assign(
+        {
+          value: (data.currentPage * 100) / data.maxPage,
+        },
+        data
+      );
 
       if (this.progress.currentPage === this.progress.maxPage) {
         this.inProgress = false;
+        this.resetProgress();
         this.isCompleted = true;
       }
     },

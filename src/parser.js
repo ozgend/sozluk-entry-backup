@@ -58,7 +58,7 @@ const getListHtml = (username, page, maxPage, entries) => {
     ${items.join('\n')}
     </ul>
     <div class="nav"><a href="${previousFilename}">⏪ #${page - 1}</a> <span class="spacer">[#${page}]</span> <a href="${nextFilename}">#${page + 1} ⏩</a> <span class="spacer">/${maxPage}</span></div>
-    <sub>v${global.__app_version} @ <a href="https://github.com/ozgend" target="_blank">entry-backup</a></sub>
+    <sub>v${global.__app_version} @ <a href="https://github.com/ozgend/sozluk-entry-backup" target="_blank">entry-backup</a></sub>
     </body></html>`;
 };
 
@@ -95,8 +95,7 @@ const saveUserEntries = async (options, onProgressUpdated) => {
     options.startPage = options.startPage || 1;
     let currentPage = options.startPage;
     options.maxPage = currentPage + 1;
-
-    // let batch = [];
+    let entryCount = 0;
 
     while (currentPage <= options.maxPage) {
         const result = await parsePage(options.username, currentPage);
@@ -108,11 +107,10 @@ const saveUserEntries = async (options, onProgressUpdated) => {
             options.maxPage = result.availableMaxPage;
         }
 
-        //write(options.username, currentPage, options.maxPage, result.entries);
-        // batch.push({ result });
+        entryCount = entryCount += result.entries.length;
 
         if (onProgressUpdated) {
-            onProgressUpdated({ currentPage, maxPage: options.maxPage, entries: result.entries })
+            onProgressUpdated({ currentPage, maxPage: options.maxPage, entries: result.entries, entryCount });
         }
 
         console.log(`++ parsed ${currentPage}/${options.maxPage} @ ${result.url}`);
