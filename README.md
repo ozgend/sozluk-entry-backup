@@ -1,4 +1,4 @@
-# entry-backup
+# sozluk-entry-backup
 kullanicinin sozluk profil sayfasinda yer alan entryleri yedeklemek icin scrapper. 
 
 ## local run
