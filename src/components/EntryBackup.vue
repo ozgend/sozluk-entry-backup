@@ -1,7 +1,7 @@
 <template>
     <div>
         <section
-            class="hero is-fullheight-with-navbar is-dark is-bold is-large"
+            class="hero is-fullheight-with-navbar is-dark is-bold is-large noprint"
         >
             <div class="hero-body">
                 <div class="container">
@@ -78,11 +78,18 @@
                 </div>
             </div>
         </section>
+
+        <entry-list
+            v-if="entries.length > 0"
+            v-bind:entries="entries"
+            v-bind:username="username"
+        ></entry-list>
     </div>
 </template>
 
 <script>
-import { downloadUserEntries, buildPageHtml } from "../parser";
+import { downloadUserEntries } from "../parser";
+import EntryList from "./EntryList.vue";
 
 const _domains = [
     {
@@ -101,6 +108,7 @@ const _progress = {
 };
 
 export default {
+    components: { EntryList },
     name: "EntryBackup",
     data: function () {
         return {
@@ -110,6 +118,7 @@ export default {
             domains: _domains,
             selectedDomainId: "uludag",
             username: null,
+            entries: [],
         };
     },
     computed: {
@@ -155,33 +164,36 @@ export default {
                 data
             );
 
-            const currentFilename = `e_${this.progress.currentPage}.html`;
+            this.entries.push(...data.entries);
 
-            const pageHtml = buildPageHtml(
-                this.username,
-                this.progress.currentPage,
-                this.progress.maxPage,
-                this.progress.entries
-            );
+            //const currentFilename = `e_${this.progress.currentPage}.html`;
 
-            this.downloadFile(currentFilename, pageHtml);
+            // const pageHtml = buildPageHtml(
+            //     this.username,
+            //     this.progress.currentPage,
+            //     this.progress.maxPage,
+            //     this.progress.entries
+            // );
+
+            //this.downloadFile(currentFilename, pageHtml);
 
             if (this.progress.currentPage === this.progress.maxPage) {
                 this.inProgress = false;
                 this.resetProgress();
                 this.isCompleted = true;
+                this.$el.querySelector('#entries-top').scrollIntoView();
             }
         },
 
-        downloadFile(title, data) {
-            console.log(title);
-            const url = window.URL.createObjectURL(new Blob([data]));
-            const link = document.createElement("a");
-            link.href = url;
-            link.setAttribute("download", title);
-            document.body.appendChild(link);
-            link.click();
-        },
+        // downloadFile(title, data) {
+        //     console.log(title);
+        //     const url = window.URL.createObjectURL(new Blob([data]));
+        //     const link = document.createElement("a");
+        //     link.href = url;
+        //     link.setAttribute("download", title);
+        //     document.body.appendChild(link);
+        //     link.click();
+        // },
     },
 };
 </script>

@@ -74,18 +74,18 @@ const write = (username, page, maxPage, entries) => {
     fs.writeFileSync(path.join(userFolder, currentFilename), html);
 };
 
-const getPageUrl = (username, page) => {
-    return `https://${username}.uludagsozluk.com/&p=${page}`;
+const getPageUrl = (urlTemplate, username, page) => {
+    return urlTemplate.replace('[USER]', username).replace('[PAGE]', page);
 };
 
-const urlStartRegex = new RegExp('href=\"//', 'gi');
+const urlStartRegex = new RegExp('href="//', 'gi');
 
 const parsePage = async (urlTemplate, username, page) => {
     let url = getPageUrl(urlTemplate, username, page);
     let response = await scrape(url, contentMappingOptions);
     let availableMaxPage = response.data.pages.map(p => parseInt(p.content)).filter(p => p > 0).pop();
     let entries = response.data.entries.map(e => {
-        e.content = e.content.replace(urlStartRegex, 'href=\"https://');
+        e.content = e.content.replace(urlStartRegex, 'href="https://');
         return e;
     });
     return {
