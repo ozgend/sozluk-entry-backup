@@ -28,7 +28,7 @@ const contentMappingOptions = {
 };
 
 const buildItemHtml = (entry) => {
-    return `<li><h3 class="title">${entry.title}</h3> <span class="info">@${entry.date} <a href="${entry.url}">${entry.id}</a></span> <p class="content">${entry.content}</p></li>`;
+    return `<li><h3 class="title">${entry.title}</h3> <span class="info">@${entry.date} <a href="https://${entry.url}">${entry.id}</a></span> <p class="content">${entry.content}</p></li>`;
 }
 
 const buildPageHtml = (username, page, maxPage, entries) => {
@@ -58,7 +58,7 @@ const buildPageHtml = (username, page, maxPage, entries) => {
     ${items.join('\n')}
     </ul>
     <div class="nav"><a href="${previousFilename}">⏪ #${page - 1}</a> <span class="spacer">[#${page}]</span> <a href="${nextFilename}">#${page + 1} ⏩</a> <span class="spacer">/${maxPage}</span></div>
-    <sub>v${global.__app_version} @ <a href="https://github.com/ozgend/sozluk-entry-backup" target="_blank">entry-backup</a></sub>
+    <sub>v${global.__app_version} @ <a href="https://github.com/ozgend/sozluk-entry-backup" target="_blank">sozluk-entry-backup</a></sub>
     </body></html>`;
 };
 
@@ -78,27 +78,32 @@ const getPageUrl = (username, page) => {
     return `https://${username}.uludagsozluk.com/&p=${page}`;
 };
 
-const parsePage = async (username, page) => {
-    let url = getPageUrl(username, page);
+const urlStartRegex = new RegExp('href=\"//', 'gi');
+
+const parsePage = async (urlTemplate, username, page) => {
+    let url = getPageUrl(urlTemplate, username, page);
     let response = await scrape(url, contentMappingOptions);
     let availableMaxPage = response.data.pages.map(p => parseInt(p.content)).filter(p => p > 0).pop();
-
+    let entries = response.data.entries.map(e => {
+        e.content = e.content.replace(urlStartRegex, 'href=\"https://');
+        return e;
+    });
     return {
-        entries: response.data.entries,
+        entries,
         availableMaxPage,
         page,
         url
     };
 };
 
-const downloadUserEntries = async (options, onProgressUpdated) => {
+const downloadUserEntries = async (options, onProgressUpdate) => {
     options.startPage = options.startPage || 1;
     let currentPage = options.startPage;
     options.maxPage = currentPage + 1;
     let entryCount = 0;
 
     while (currentPage <= options.maxPage) {
-        const result = await parsePage(options.username, currentPage);
+        const result = await parsePage(options.urlTemplate, options.username, currentPage);
 
         if (options.pageLength) {
             options.maxPage = options.startPage + options.pageLength;
@@ -109,8 +114,8 @@ const downloadUserEntries = async (options, onProgressUpdated) => {
 
         entryCount = entryCount += result.entries.length;
 
-        if (onProgressUpdated) {
-            onProgressUpdated({ currentPage, maxPage: options.maxPage, entries: result.entries, entryCount });
+        if (onProgressUpdate) {
+            onProgressUpdate({ currentPage, maxPage: options.maxPage, entries: result.entries, entryCount });
         }
 
         console.log(`++ parsed ${currentPage}/${options.maxPage} @ ${result.url}`);
