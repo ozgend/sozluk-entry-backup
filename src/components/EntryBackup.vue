@@ -45,14 +45,14 @@
                                     class="button is-primary is-large"
                                     @click="getUserEntries()"
                                     :disabled="!hasDomain || !hasUsername"
-                                    v-show="!inProgress"
+                                    v-show="!isBusy"
                                 >
                                     kaydet
                                 </button>
                                 <button
                                     class="button is-warning is-large"
                                     @click="cancelRequest()"
-                                    v-show="inProgress"
+                                    v-show="isBusy"
                                 >
                                     iptal
                                 </button>
@@ -60,7 +60,7 @@
                         </div>
                         <h3 class="title is-size-5">{{ profileUrl }}</h3>
                     </div>
-                    <div v-if="inProgress">
+                    <div v-if="isBusy">
                         <p class="my-4">
                             <span
                                 >sayfa # {{ progress.currentPage }} /
@@ -85,11 +85,11 @@
                                 >{{ progress.entryCount }} entry
                                 getirildi.</span
                             >
-                            <span
+                            <!-- <span
                                 class="has-text-warning px-1"
                                 v-if="isCancelled"
                                 >iptal edildi.</span
-                            >
+                            > -->
                             <span class="has-text-danger px-1" v-if="isError">{{
                                 errorMessage
                             }}</span>
@@ -134,7 +134,7 @@ export default {
     name: "EntryBackup",
     data: function () {
         return {
-            inProgress: false,
+            isBusy: false,
             isCompleted: false,
             isCancelled: false,
             isError: false,
@@ -169,15 +169,19 @@ export default {
         resetProgress() {
             Object.assign({}, _progress);
             this.isCompleted = true;
-            this.inProgress = false;
-            this.isCancelled = false;
+            this.isBusy = false;
             this.isError = false;
             this.errorMessage = null;
         },
 
-        async getUserEntries() {
+        resetCancellation(){
+            this.isCancelled = false;
+        },
+
+        async getUserEntries() {         
             this.resetProgress();
-            this.inProgress = !this.inProgress;
+            this.resetCancellation();
+            this.isBusy = true;
 
             let result = await downloadUserEntries(
                 {

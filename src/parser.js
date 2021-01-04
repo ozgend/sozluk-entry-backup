@@ -72,12 +72,12 @@ const downloadUserEntries = async (options, onProgressListener, cancellationHand
     let entryCount = 0;
     let isCancelled = false;
 
-    while (currentPage <= options.maxPage) {
+    while (currentPage <= options.maxPage && !isCancelled) {
         if (cancellationHandle) {
             isCancelled = cancellationHandle();
 
             if (isCancelled) {
-                return;
+                return { error: 'iptal edildi.', completed: true };
             }
         }
 

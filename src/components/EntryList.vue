@@ -1,11 +1,6 @@
 <template>
     <div class="container px-2">
-        <h2 class="title my-2 py-4 has-text-white" id="entries-top">
-            {{ username }} - {{ entries.length }} entry |
-            {{ new Date().toLocaleString() }}
-        </h2>
-
-        <div class="controls noprint">
+        <div class="controls noprint my-4" id="entries-top">
             <button class="button is-info mx-1" @click="dumpJson()">
                 <i class="fas fa-cloud-download-alt mx-1"></i>json
             </button>
@@ -23,18 +18,27 @@
             </a>
         </div>
 
-        <ul class="is-full entries">
-            <li v-for="entry in entries" :key="entry.id">
-                <h3 class="title">{{ entry.title }}</h3>
-                <span class="info"
-                    >{{ entry.date }}
-                    <a :href="`https://${entry.url}`">{{ entry.id }}</a></span
-                >
-                <p class="content" v-html="entry.content"></p>
-            </li>
-        </ul>
+        <div ref="entriesContainer">
+            <h2 class="title my-2 py-4 has-text-white">
+                {{ username }} - {{ entries.length }} entry |
+                {{ new Date().toLocaleString() }}
+            </h2>
 
-        <div class="controls noprint">
+            <ul class="is-full entries">
+                <li v-for="entry in entries" :key="entry.id">
+                    <h3 class="title">{{ entry.title }}</h3>
+                    <span class="info"
+                        >{{ entry.date }}
+                        <a :href="`https://${entry.url}`">{{
+                            entry.id
+                        }}</a></span
+                    >
+                    <p class="content" v-html="entry.content"></p>
+                </li>
+            </ul>
+        </div>
+
+        <div class="controls noprint" id="entries-bottom">
             <button class="button is-info mx-1" @click="dumpJson()">
                 <i class="fas fa-cloud-download-alt mx-1"></i>json
             </button>
@@ -53,7 +57,7 @@
         </div>
 
         <div class="is-large my-6">
-            <sub id="entries-bottom">
+            <sub>
                 <a
                     href="https://github.com/ozgend/sozluk-entry-backup"
                     target="_blank"
@@ -67,6 +71,24 @@
 </template>
 
 <script>
+import { jsPDF } from "jspdf";
+// eslint-disable-next-line no-unused-vars
+import fontOpenSans from "../font-open-sans";
+
+let _doc;
+
+// const _pdfOptions = {
+//     orientation: "portrait",
+//     unit: "mm",
+//     format: [297, 210],
+// };
+const _renderOptions = {
+    dpi: 300,
+    letterRendering: true,
+    width: 522,
+    scale: 1,
+};
+
 export default {
     name: "EntryList",
     props: ["username", "entries"],
@@ -74,11 +96,26 @@ export default {
         return {};
     },
     methods: {
-        exportPdf() {
-            window.print();
+        async exportPdf() {
+            const filename = `entries_${encodeURIComponent(
+                this.username
+            )}_${Date.now()}.pdf`;
+
+            _doc = new jsPDF();
+            _doc.setLanguage("tr-TR");
+
+            _doc.addFont("../OpenSans-Regular.ttf", "OpenSans", "normal");
+            _doc.setFont("OpenSans");
+
+            await _doc.html(this.$refs.entriesContainer, {
+                filename,
+                html2canvas: _renderOptions,
+            });
+
+            _doc.save(filename);
         },
         dumpJson() {
-            const filename = `entries_${encodeURIComponent(
+            const filename = `entries_dump_${encodeURIComponent(
                 this.username
             )}_${Date.now()}.json`;
             const url = window.URL.createObjectURL(

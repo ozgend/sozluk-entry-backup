@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "jspdf": "^2.2.0",
     "scrape-it": "^5.2.4",
     "vue": "^2.6.11"
   },
