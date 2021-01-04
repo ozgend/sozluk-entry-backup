@@ -1,0 +1,16 @@
+{
+  "name": "entry-backup-service",
+  "version": "0.0.1",
+  "description": "entry-backup service",
+  "author": "ozgend",
+  "scripts": {
+    "service:start": "node ./src/service.js",
+    "service:host": "nodemon ./src/service.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.6",
+    "socket.io": "^3.0.4"
+  }
+}
