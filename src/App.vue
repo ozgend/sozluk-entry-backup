@@ -10,7 +10,7 @@
             integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA=="
             crossorigin="anonymous"
         />
-        <InfoBar class=""/>
+        <InfoBar class="noprint" />
         <EntryBackup />
     </div>
 </template>
@@ -41,7 +41,12 @@ body {
     -moz-osx-font-smoothing: grayscale;
     color: #dedede;
 }
+
 @media print {
+    html,
+    body {
+        background-color: #363636 !important;
+    }
     .noprint {
         display: none;
     }
