@@ -1,11 +1,11 @@
 <template>
-    <div class="container">
-        <h2 class="title my-4 has-text-white" id="entries-top">
+    <div class="container px-2">
+        <h2 class="title my-2 py-4 has-text-white" id="entries-top">
             {{ username }} - {{ entries.length }} entry |
             {{ new Date().toLocaleString() }}
         </h2>
 
-        <div class="controls">
+        <div class="controls noprint">
             <button class="button is-info mx-1" @click="dumpJson()">
                 <i class="fas fa-cloud-download-alt mx-1"></i>json
             </button>
@@ -28,13 +28,13 @@
                 <h3 class="title">{{ entry.title }}</h3>
                 <span class="info"
                     >{{ entry.date }}
-                    <a href="https://${entry.url}">{{ entry.id }}</a></span
+                    <a :href="`https://${entry.url}`">{{ entry.id }}</a></span
                 >
                 <p class="content" v-html="entry.content"></p>
             </li>
         </ul>
 
-        <div class="controls">
+        <div class="controls noprint">
             <button class="button is-info mx-1" @click="dumpJson()">
                 <i class="fas fa-cloud-download-alt mx-1"></i>json
             </button>
@@ -74,11 +74,16 @@ export default {
         return {};
     },
     methods: {
+        exportPdf() {
+            window.print();
+        },
         dumpJson() {
             const filename = `entries_${encodeURIComponent(
                 this.username
             )}_${Date.now()}.json`;
-            const url = window.URL.createObjectURL(new Blob([this.entries]));
+            const url = window.URL.createObjectURL(
+                new Blob([JSON.stringify(this.entries)])
+            );
             const link = document.createElement("a");
             link.href = url;
             link.setAttribute("download", filename);
@@ -90,10 +95,16 @@ export default {
 </script>
  
 <style scoped>
+@media print {
+    .noprint {
+        display: none;
+    }
+}
 ul.entries {
     color: #1d1d1d;
     margin: 0;
     padding: 0;
+    text-transform: lowercase;
 }
 ul.entries > li {
     list-style: none;
