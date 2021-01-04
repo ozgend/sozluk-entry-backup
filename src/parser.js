@@ -1,5 +1,8 @@
 const scrape = require('scrape-it');
 
+const userNotFound = 'Böyle bir kullanıcı bulunamadı';
+const userNotExist = 'isimli bir üyemiz yok!!';
+
 const contentMappingOptions = {
     entries: {
         listItem: '.li_capsul_entry',
@@ -22,6 +25,8 @@ const contentMappingOptions = {
         data: {
             content: 'a'
         }
+    },
+    alert: 'div.alert'
 };
 
 const getPageUrl = (urlTemplate, username, page) => {
@@ -31,13 +36,27 @@ const getPageUrl = (urlTemplate, username, page) => {
 const urlStartRegex = new RegExp('href="//', 'gi');
 
 const parsePage = async (urlTemplate, username, page) => {
-    let url = getPageUrl(urlTemplate, username, page);
-    let response = await scrape(url, contentMappingOptions);
-    let availableMaxPage = response.data.pages.map(p => parseInt(p.content)).filter(p => p > 0).pop();
-    let entries = response.data.entries.map(e => {
+    const url = getPageUrl(urlTemplate, username, page);
+    const response = await scrape(url, contentMappingOptions);
+    const hasAlert = response.data.alert && (response.data.alert.indexOf(userNotExist) > -1 || response.data.alert.indexOf(userNotFound) > -1);
+
+    if (hasAlert) {
+        return {
+            error: response.data.alert,
+            availableMaxPage: -1,
+            entries: [],
+            page,
+            url
+        };
+    }
+
+    const availableMaxPage = response.data.pages.map(p => parseInt(p.content)).filter(p => p > 0).pop();
+    const entries = response.data.entries.map(e => {
         e.content = e.content.replace(urlStartRegex, 'href="https://');
+        e.url = `https://${e.url}`;
         return e;
     });
+
     return {
         entries,
         availableMaxPage,
@@ -46,13 +65,22 @@ const parsePage = async (urlTemplate, username, page) => {
     };
 };
 
-const downloadUserEntries = async (options, onProgressUpdate) => {
+const downloadUserEntries = async (options, onProgressListener, cancellationHandle) => {
     options.startPage = options.startPage || 1;
     let currentPage = options.startPage;
     options.maxPage = currentPage + 1;
     let entryCount = 0;
+    let isCancelled = false;
 
     while (currentPage <= options.maxPage) {
+        if (cancellationHandle) {
+            isCancelled = cancellationHandle();
+
+            if (isCancelled) {
+                return;
+            }
+        }
+
         const result = await parsePage(options.urlTemplate, options.username, currentPage);
 
         if (options.pageLength) {
@@ -64,18 +92,23 @@ const downloadUserEntries = async (options, onProgressUpdate) => {
 
         entryCount = entryCount += result.entries.length;
 
-        if (onProgressUpdate) {
-            onProgressUpdate({ currentPage, maxPage: options.maxPage, entries: result.entries, entryCount });
+        if (result.error) {
+            return { error: result.error, completed: true };
         }
 
-        console.log(`++ parsed ${currentPage}/${options.maxPage} @ ${result.url}`);
+        if (onProgressListener) {
+            onProgressListener({ currentPage, maxPage: options.maxPage, entries: result.entries, entryCount });
+        }
+
+        //console.log(`++ parsed ${currentPage}/${options.maxPage} @ ${result.url}`);
 
         if (currentPage == options.maxPage) {
-            console.log(`finished ${currentPage}/${options.maxPage}`);
-            return;
+            //console.log(`finished ${currentPage}/${options.maxPage}`);
+            return { completed: true, pageCount: options.maxPage, entryCount };
         }
+
         currentPage++;
     }
 };
 
-module.exports = { downloadUserEntries, write, buildPageHtml };
+module.exports = { downloadUserEntries };

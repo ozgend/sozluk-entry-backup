@@ -45,8 +45,16 @@
                                     class="button is-primary is-large"
                                     @click="getUserEntries()"
                                     :disabled="!hasDomain || !hasUsername"
+                                    v-show="!inProgress"
                                 >
                                     kaydet
+                                </button>
+                                <button
+                                    class="button is-warning is-large"
+                                    @click="cancelRequest()"
+                                    v-show="inProgress"
+                                >
+                                    iptal
                                 </button>
                             </p>
                         </div>
@@ -72,7 +80,19 @@
 
                     <div v-if="isCompleted">
                         <p class="my-2">
-                            {{ progress.entryCount }} entry tamamlandı.
+                            <i class="fas fa-sticky-note"></i>
+                            <span class="px-1"
+                                >{{ progress.entryCount }} entry
+                                getirildi.</span
+                            >
+                            <span
+                                class="has-text-warning px-1"
+                                v-if="isCancelled"
+                                >iptal edildi.</span
+                            >
+                            <span class="has-text-danger px-1" v-if="isError">{{
+                                errorMessage
+                            }}</span>
                         </p>
                     </div>
                 </div>
@@ -90,6 +110,8 @@
 <script>
 import { downloadUserEntries } from "../parser";
 import EntryList from "./EntryList.vue";
+
+const _sanitizeRegex = new RegExp("\\s", "g");
 
 const _domains = [
     {
@@ -114,6 +136,9 @@ export default {
         return {
             inProgress: false,
             isCompleted: false,
+            isCancelled: false,
+            isError: false,
+            errorMessage: null,
             progress: Object.assign({}, _progress),
             domains: _domains,
             selectedDomainId: "uludag",
@@ -133,27 +158,45 @@ export default {
         },
         profileUrl() {
             return this.hasUsername && this.hasDomain
-                ? `${this.username}.${this.selectedDomain.host}`
+                ? `${this.sanitizedUsername}.${this.selectedDomain.host}`
                 : "";
+        },
+        sanitizedUsername() {
+            return this.username.replace(_sanitizeRegex, "-");
         },
     },
     methods: {
         resetProgress() {
             Object.assign({}, _progress);
+            this.isCompleted = true;
+            this.inProgress = false;
+            this.isCancelled = false;
+            this.isError = false;
+            this.errorMessage = null;
         },
 
-        getUserEntries() {
+        async getUserEntries() {
             this.resetProgress();
             this.inProgress = !this.inProgress;
 
-            downloadUserEntries(
+            let result = await downloadUserEntries(
                 {
                     urlTemplate: this.selectedDomain.urlTemplate,
-                    username: this.username,
-                    pageLength: 10,
+                    username: this.sanitizedUsername,
                 },
-                this.onProgressUpdate
+                this.onProgressUpdate,
+                this.cancellationHandle
             );
+
+            if (result.error) {
+                this.resetProgress();
+                this.isError = true;
+                this.errorMessage = result.error;
+            }
+        },
+
+        cancellationHandle() {
+            return this.isCancelled;
         },
 
         onProgressUpdate(data) {
@@ -166,34 +209,21 @@ export default {
 
             this.entries.push(...data.entries);
 
-            //const currentFilename = `e_${this.progress.currentPage}.html`;
-
-            // const pageHtml = buildPageHtml(
-            //     this.username,
-            //     this.progress.currentPage,
-            //     this.progress.maxPage,
-            //     this.progress.entries
-            // );
-
-            //this.downloadFile(currentFilename, pageHtml);
-
             if (this.progress.currentPage === this.progress.maxPage) {
-                this.inProgress = false;
                 this.resetProgress();
-                this.isCompleted = true;
-                this.$el.querySelector('#entries-top').scrollIntoView();
+                this.$el.querySelector("#entries-top").scrollIntoView();
+                return;
+            }
+
+            if (this.isCancelled) {
+                this.resetProgress();
+                return;
             }
         },
 
-        // downloadFile(title, data) {
-        //     console.log(title);
-        //     const url = window.URL.createObjectURL(new Blob([data]));
-        //     const link = document.createElement("a");
-        //     link.href = url;
-        //     link.setAttribute("download", title);
-        //     document.body.appendChild(link);
-        //     link.click();
-        // },
+        cancelRequest() {
+            this.isCancelled = true;
+        },
     },
 };
 </script>
@@ -212,5 +242,10 @@ li {
 }
 a {
     color: #42b983;
+}
+@media print {
+    .noprint {
+        display: none;
+    }
 }
 </style>
