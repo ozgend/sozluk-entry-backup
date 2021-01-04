@@ -3,37 +3,23 @@
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
-const cors = require('cors')
 const io = require('socket.io')(http, {
     cors: {
-        origin: "http://localhost:8143",
-        allowedHeaders: ["Authorization"],
+        origin: "http://localhost:8080",
+        allowedHeaders: ["Authorization", "Content-Type", "Accept"],
         methods: ["GET", "POST"],
         credentials: true
     }
 });
+
 const path = require('path');
 
 const port = process.env.PORT || 4040;
 const staticFiles = path.join(path.dirname(__dirname), 'public');
 console.log(`static file path: ${staticFiles}`);
 
-const entriesBucket = {};
+// const entriesBucket = {};
 
-
-
-const corsOptions = {
-    origin: 'http://localhost:8143',
-    optionsSuccessStatus: 200
-};
-// app.options('*', cors());
-// app.all('/', function (request, response, next) {
-//     response.header("Access-Control-Allow-Origin", "*");
-//     response.header("Access-Control-Allow-Headers", "*");
-//     response.header("Access-Control-Allow-Credentials", "true");
-//     next();
-// });
-// app.use(cors());
 app.use(express.static(staticFiles));
 
 app.get('/', (req, res) => {
@@ -44,11 +30,11 @@ io.on('connection', (socket) => {
     console.log(`+ connected ${socket.id}`);
     socket.emit('sid_sync', socket.id);
 
-    createBucket(socket.id);
+    createSBucket(socket);
 
     socket.on('chunk_sync', (items) => {
         console.log(`+ got chunk from ${socket.id}`);
-        appendBucket(socket.id, items);
+        appendSBucket(socket, items);
     });
 
     socket.on('disconnecting', () => {
@@ -57,7 +43,7 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log(`+ disconnected ${socket.id}`);
-        removeBucket(socket.id);
+        removeSBucket(socket);
     });
 
 });
@@ -68,18 +54,34 @@ http.listen(port, () => {
 
 console.log(`service running`);
 
-const createBucket = (id) => {
-    entriesBucket[socket.id] = [];
+// const createBucket = (id) => {
+//     entriesBucket[id] = [];
+// };
+
+// const removeBucket = (id) => {
+//     delete entriesBucket[id];
+// };
+
+// const appendBucket = (id, entries) => {
+//     entriesBucket[id].push(...entries);
+// };
+
+// const getBucket = (id) => {
+//     return entriesBucket[id];
+// };
+
+const createSBucket = (socket) => {
+    socket.handshake.data = { entries: [] };
 };
 
-const removeBucket = (id) => {
-    delete entriesBucket[socket.id];
+const removeSBucket = (socket) => {
+    delete socket.handshake.data.entries;
 };
 
-const appendBucket = (id, entries) => {
-    entriesBucket[socket.id].push(...entries);
+const appendSBucket = (socket, entries) => {
+    socket.handshake.data.entries.push(...entries);
 };
 
-const getBucket = (id) => {
-    return entriesBucket[socket.id];
+const getSBucket = (socket) => {
+    return socket.handshake.data.entries;
 };

@@ -1,21 +1,13 @@
-import Vue from 'vue';
-import App from './App.vue';
-import VueSocketIO from 'vue-socket.io'
-import SocketIO from 'socket.io-client'
+import Vue from "vue";
+import App from "./App.vue";
+import VueSocketIoExt from "vue-socket.io-extended";
+import io from "socket.io-client";
+
+const socket = io("ws://localhost:4040");
+Vue.use(VueSocketIoExt, socket);
 
 Vue.config.productionTip = false;
 
-const socketConnection = SocketIO('http://localhost:4040', {
-
-});
-
-const socket = new VueSocketIO({
-  debug: true,
-  connection: socketConnection
-});
-
-Vue.use(socket);
-
 new Vue({
-  render: h => h(App),
-}).$mount('#app');
+  render: h => h(App)
+}).$mount("#app");

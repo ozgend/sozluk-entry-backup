@@ -4,8 +4,8 @@
   "description": "entry-backup service",
   "author": "ozgend",
   "scripts": {
-    "service:start": "node ./src/service.js",
-    "service:host": "nodemon ./src/service.js"
+    "service:start": "node ./src/host.js",
+    "service:host": "nodemon ./src/host.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
