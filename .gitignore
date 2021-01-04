@@ -23,3 +23,6 @@ pnpm-debug.log*
 *.sw?
 package-lock.json
 test.js
+
+/src/service/public/
+/src/ui/dist/
