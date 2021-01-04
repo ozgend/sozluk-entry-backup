@@ -1,5 +1,3 @@
-const fs = require('fs');
-const path = require('path');
 const scrape = require('scrape-it');
 
 const contentMappingOptions = {
@@ -24,54 +22,6 @@ const contentMappingOptions = {
         data: {
             content: 'a'
         }
-    }
-};
-
-const buildItemHtml = (entry) => {
-    return `<li><h3 class="title">${entry.title}</h3> <span class="info">@${entry.date} <a href="https://${entry.url}">${entry.id}</a></span> <p class="content">${entry.content}</p></li>`;
-}
-
-const buildPageHtml = (username, page, maxPage, entries) => {
-    const nextFilename = `e_${page + 1}.html`;
-    const previousFilename = `e_${page - 1}.html`;
-    const items = entries.map(entry => buildItemHtml(entry));
-
-    return `<!DOCTYPE html>
-    <html data-version="${global.__app_version}">
-    <head>
-    <title>${username} | entries #${page}/${maxPage}</title>
-    <style>
-    html,body { font-family: sans-serif; }
-    ul { margin:0; padding:0; }
-    li { list-style: none; padding: 0.5rem; margin: 1rem; background: #dde1e6; }
-    p.content { padding: 0.5rem; }
-    h3.title { padding: 0.5rem; margin: 0px; background: #a24468; color: white; }
-    h2.title { color: #a24468; }
-    span.info { display: inline-block; padding: 0.2rem; background: #fefefe; font-size: small }
-    div.nav { margin-top: 1rem; border-top: 1px solid gray; text-align: center; }
-    span.spacer { display:inline-block; margin: 0 1.4rem; }
-    </style>
-    </head>
-    <body>
-    <h2 class="title">${username}</h2>
-    <ul>
-    ${items.join('\n')}
-    </ul>
-    <div class="nav"><a href="${previousFilename}">⏪ #${page - 1}</a> <span class="spacer">[#${page}]</span> <a href="${nextFilename}">#${page + 1} ⏩</a> <span class="spacer">/${maxPage}</span></div>
-    <sub>v${global.__app_version} @ <a href="https://github.com/ozgend/sozluk-entry-backup" target="_blank">sozluk-entry-backup</a></sub>
-    </body></html>`;
-};
-
-const write = (username, page, maxPage, entries) => {
-    const userFolder = path.join('./', username);
-    const currentFilename = `e_${page}.html`;
-    const html = buildPageHtml(username, page, maxPage, entries);
-
-    if (!fs.existsSync(userFolder)) {
-        fs.mkdirSync(userFolder)
-    }
-
-    fs.writeFileSync(path.join(userFolder, currentFilename), html);
 };
 
 const getPageUrl = (urlTemplate, username, page) => {
