@@ -146,6 +146,14 @@ export default {
             entries: [],
         };
     },
+    sockets: {
+        connect: function () {
+            console.log("socket connected");
+        },
+        sid_sync: function (id) {
+            console.log(`sid_sync received: sid=${id}`);
+        },
+    },
     computed: {
         hasUsername() {
             return this.username && this.username.trim().length > 0;
@@ -174,11 +182,11 @@ export default {
             this.errorMessage = null;
         },
 
-        resetCancellation(){
+        resetCancellation() {
             this.isCancelled = false;
         },
 
-        async getUserEntries() {         
+        async getUserEntries() {
             this.resetProgress();
             this.resetCancellation();
             this.isBusy = true;
@@ -211,7 +219,9 @@ export default {
                 data
             );
 
-            this.entries.push(...data.entries);
+            //this.entries.push(...data.entries);
+
+            this.$socket.emit("chunk_sync", data.entries);
 
             if (this.progress.currentPage === this.progress.maxPage) {
                 this.resetProgress();
