@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <title>{{ username }} - {{ entries.length }} entry</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css" />
+  <style>
+    html,
+    body {
+      font-family: Raleway, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background-color: #363636 !important;
+      margin: 0;
+      padding: 0.5rem;
+    }
+
+    a {
+      text-decoration: none;
+      color: #3273dc;
+      cursor: pointer;
+    }
+
+
+    ul.entries {
+      color: #1d1d1d;
+      margin: 0;
+      padding: 0;
+      text-transform: lowercase;
+    }
+
+    ul.entries>li {
+      list-style: none;
+      padding: 0.5rem;
+      margin: 1rem 0;
+      background: #dde1e6;
+    }
+
+    ul.entries>li>p.content {
+      padding: 0.5rem;
+    }
+
+    ul.entries>li>h3.title {
+      padding: 0.5rem;
+      margin: 0px;
+      background: #a24468;
+      color: white;
+      font-size: 1.5rem;
+    }
+
+    h2.title {
+      font-size: 1.7rem;
+    }
+
+    ul.entries>li>span.info {
+      display: inline-block;
+      padding: 0.2rem;
+      background: #fefefe;
+      font-size: small;
+    }
+
+    div.nav {
+      margin-top: 1rem;
+      border-top: 1px solid gray;
+      text-align: center;
+    }
+
+    span.spacer {
+      display: inline-block;
+      margin: 0 1.4rem;
+    }
+  </style>
+</head>
+
+
+<body>
+  <!--vue-ssr-outlet-->
+</body>
+
+</html>

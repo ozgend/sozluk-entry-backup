@@ -1,0 +1,23 @@
+<div>
+  <h2 class="title my-2 py-4 has-text-white">
+    {{ username }} - {{ entries.length }} entry |
+    {{ new Date().toLocaleString() }}
+  </h2>
+  <ul class="is-full entries">
+    <li v-for="entry in entries" :key="entry.id">
+      <h3 class="title">{{ entry.title }}</h3>
+      <span class="info">{{ entry.date }}
+        <a :href="`https://${entry.url}`">{{
+          entry.id
+          }}</a></span>
+      <p class="content" v-html="entry.content"></p>
+    </li>
+  </ul>
+
+  <div class="is-large my-6">
+    <sub>
+      <a href="https://github.com/ozgend/sozluk-entry-backup" target="_blank" class="has-text-white">
+        <i class="fab fa-github mx-1"></i>sozluk-entry-backup
+      </a></sub>
+  </div>
+</div>
