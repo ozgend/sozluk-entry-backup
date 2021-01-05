@@ -105,10 +105,24 @@ const render = async (socket, data) => {
     const timestamp = Date.now();
 
     try {
+        const entries = getSBucket(socket).map(e => {
+            e.content = e.content
+                .replace(/(href="\/zlib)/gi, 'href="https://uludagsozluk.com/zlib')
+                .replace(/(href="\/\/)/g, 'href="https://')
+                .replace(/(src="\/\/)/g, 'href="https://')
+                .replace(/http:\/\//g, 'https://');
+
+            // if (e.url.indexOf('//') === 0) {
+            //     e.url = `https:${e.url}`;
+            // }
+            return e;
+        });
+
         const context = {
             username: data.username,
-            entries: getSBucket(socket)
+            entries
         };
+
         // write json
         const jsonContent = JSON.stringify(context.entries);
         const jsonFilename = `entries_${encodeURIComponent(data.username)}_${timestamp}.json`;
