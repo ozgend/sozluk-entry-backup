@@ -26,3 +26,4 @@ test.js
 
 /src/service/public/
 /src/ui/dist/
+**/temp

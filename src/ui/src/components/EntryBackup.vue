@@ -76,11 +76,6 @@
               <span class="px-1"
                 >{{ progress.entryCount }} entry getirildi.</span
               >
-              <!-- <span
-                                class="has-text-warning px-1"
-                                v-if="isCancelled"
-                                >iptal edildi.</span
-                            > -->
               <span class="has-text-danger px-1" v-if="isError">{{
                 errorMessage
               }}</span>
@@ -89,18 +84,11 @@
         </div>
       </div>
     </section>
-
-    <entry-list
-      v-if="entries.length > 0"
-      v-bind:entries="entries"
-      v-bind:username="username"
-    ></entry-list>
   </div>
 </template>
 
 <script>
 import { downloadUserEntries } from "../parser";
-import EntryList from "./EntryList.vue";
 
 const _sanitizeRegex = new RegExp("\\s", "g");
 
@@ -121,7 +109,6 @@ const _progress = {
 };
 
 export default {
-  components: { EntryList },
   name: "EntryBackup",
   data: function () {
     return {
@@ -141,8 +128,14 @@ export default {
     connect() {
       console.log("socket connected");
     },
-    sid_sync(id) {
-      console.log(`sid_sync received: sid=${id}`);
+    onSyncSid(id) {
+      console.log(`++ onSyncSid sid=${id}`);
+    },
+    onBuildCompleted() {
+      console.log(`++ onBuildCompleted`);
+    },
+    onRenderCompleted(result) {
+      console.log(`++ onRenderCompleted ${result}`);
     },
   },
   computed: {
@@ -210,13 +203,11 @@ export default {
         data
       );
 
-      //this.entries.push(...data.entries);
-
-      this.$socket.client.emit("chunk_sync", data.entries);
+      this.$socket.client.emit("onSyncChunk", data.entries);
 
       if (this.progress.currentPage === this.progress.maxPage) {
         this.resetProgress();
-        this.$el.querySelector("#entries-top").scrollIntoView();
+        this.beginRender();
         return;
       }
 
@@ -228,6 +219,12 @@ export default {
 
     cancelRequest() {
       this.isCancelled = true;
+      // this.$socket.client.emit("onCancelRequest");
+      this.$socket.client.emit("onBeginRender", { username: this.username });
+    },
+
+    beginRender() {
+      this.$socket.client.emit("onBeginRender", { username: this.username });
     },
   },
 };

@@ -1,6 +1,9 @@
 {
   "name": "root",
   "private": true,
+  "scripts": {
+    "ui-deploy": "lerna run ui:build && lerna run ui:publish"
+  },
   "devDependencies": {
     "lerna": "^3.22.1"
   }

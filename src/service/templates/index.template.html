@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <title>{{ username }} - {{ entries.length }} entry</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+    integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA=="
+    crossorigin="anonymous" />
+  <style>
+    ul.entries {
+      color: #1d1d1d;
+      margin: 0;
+      padding: 0;
+      text-transform: lowercase;
+    }
+
+    ul.entries>li {
+      list-style: none;
+      padding: 0.5rem;
+      margin: 1rem 0;
+      background: #dde1e6;
+    }
+
+    ul.entries>li>p.content {
+      padding: 0.5rem;
+    }
+
+    ul.entries>li>h3.title {
+      padding: 0.5rem;
+      margin: 0px;
+      background: #a24468;
+      color: white;
+      font-size: 1.5rem;
+    }
+
+    h2.title {
+      font-size: 1.7rem;
+    }
+
+    ul.entries>li>span.info {
+      display: inline-block;
+      padding: 0.2rem;
+      background: #fefefe;
+      font-size: small;
+    }
+
+    div.nav {
+      margin-top: 1rem;
+      border-top: 1px solid gray;
+      text-align: center;
+    }
+
+    span.spacer {
+      display: inline-block;
+      margin: 0 1.4rem;
+    }
+  </style>
+</head>
+
+
+<body>
+  <!--vue-ssr-outlet-->
+</body>
+
+</html>

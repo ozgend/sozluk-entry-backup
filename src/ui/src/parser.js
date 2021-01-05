@@ -33,8 +33,6 @@ const getPageUrl = (urlTemplate, username, page) => {
     return urlTemplate.replace('[USER]', username).replace('[PAGE]', page);
 };
 
-const urlStartRegex = new RegExp('href="//', 'gi');
-
 const parsePage = async (urlTemplate, username, page) => {
     const url = getPageUrl(urlTemplate, username, page);
     const response = await scrape(url, contentMappingOptions);
@@ -51,11 +49,7 @@ const parsePage = async (urlTemplate, username, page) => {
     }
 
     const availableMaxPage = response.data.pages.map(p => parseInt(p.content)).filter(p => p > 0).pop();
-    const entries = response.data.entries.map(e => {
-        e.content = e.content.replace(urlStartRegex, 'href="https://');
-        e.url = `https://${e.url}`;
-        return e;
-    });
+    const entries = response.data.entries;
 
     return {
         entries,
