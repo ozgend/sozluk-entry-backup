@@ -1,80 +1,94 @@
 <template>
-    <div>
-        <nav
-            class="navbar has-background-dark"
-            role="navigation"
-            aria-label="main navigation"
+  <div>
+    <nav
+      class="navbar has-background-dark"
+      role="navigation"
+      aria-label="main navigation"
+    >
+      <div class="navbar-brand px-3">
+        <a
+          class="button is-dark has-text-primary my-2"
+          @click="isInfoVisible = true"
         >
-            <div class="navbar-brand px-3">
-                <a class="button is-primary my-2" @click="isInfoVisible = true">
-                    <i class="fa fa-archive" aria-hidden="true"></i>
-                </a>
-            </div>
-        </nav>
+          <i class="fas fa-info-circle" aria-hidden="true"></i>
+        </a>
 
-        <div
-            class="modal has-text-primary has-background-dark"
-            :class="{ 'is-active': isInfoVisible }"
+        <a
+          class="button is-dark has-text-white my-2"
+          href="https://github.com/ozgend/sozluk-entry-backup"
+          target="_blank"
         >
-            <div class="modal-background" @click="isInfoVisible = false"></div>
-            <div class="modal-card has-background-dark">
-                <header
-                    class="modal-card-head has-text-success has-background-dark"
-                >
-                    <p class="modal-card-title has-text-primary">nedir?</p>
-                    <button
-                        aria-label="close"
-                        class="delete"
-                        @click="isInfoVisible = false"
-                    ></button>
-                </header>
-                <section
-                    class="modal-card-body has-text-primary has-background-dark"
-                >
-                    <p class="has-text-white py-2">
-                        entry yedekleme aparatı bir web scraper aracıdır ve
-                        tamamen tarayıcınız üzerinde calışır. açık profil
-                        sayfanızı tarar, baştan sona gezer ve yazılan entryleri
-                        html içeriğinden ayrıştırarak kaydedilebilir ve
-                        işlenebilir bir formatta getirir.
-                    </p>
+          <i class="fab fa-github" aria-hidden="true"></i>
+        </a>
+      </div>
+    </nav>
 
-                    <p class="has-text-white py-2">
-                        entry yedekleme aparatı açık kaynak kodlu bir
-                        uygulamadır. geliştirmeye katkıda bulunmak ya da
-                        sorun/hata/öneri bildiriminde bulunmak için kaynak
-                        bağlantısını kullanabilirsiniz.
-                        <span
-                            ><a
-                                href="https://github.com/ozgend/sozluk-entry-backup"
-                                target="_blank"
-                                class="has-text-primary"
-                                ><i class="fab fa-github px-1"></i
-                                >sozluk-entry-backup</a
-                            ></span
-                        >
-                    </p>
+    <div
+      class="modal has-text-primary has-background-dark"
+      :class="{ 'is-active': isInfoVisible }"
+    >
+      <div class="modal-background" @click="isInfoVisible = false"></div>
+      <div class="modal-card has-background-dark">
+        <header class="modal-card-head has-text-success has-background-dark">
+          <p class="modal-card-title has-text-primary">nedir?</p>
+          <button
+            aria-label="close"
+            class="delete"
+            @click="isInfoVisible = false"
+          ></button>
+        </header>
+        <section class="modal-card-body has-text-primary has-background-dark">
+          <p class="has-text-white py-2">
+            <b>entry yedekleme aparatı</b> bir web crawler aracıdır ve
+            tarayıcınız üzerinden calışır. yazdığınız entrylerin listelendiği
+            açık profil sayfanızı tarayıp baştan sona gezer ve ilgili bilgileri
+            html içeriğinden ayrıştırarak işlenebilir bir liste formatına
+            getirir.
+          </p>
 
-                    <p class="has-text-white py-2">
-                        bu uygulamanın sözlük oluşumları ile resmi bir bağı
-                        yoktur. uygulama kullanılarak elde edilebilecek
-                        internete açık verilerin, ilgili kullanıcılar ve
-                        platformlar ile yasal açıdan bir bağlayıcılığı
-                        bulunmamaktadır.
-                    </p>
-                </section>
-            </div>
-        </div>
+          <p class="has-text-white py-2">
+            <b> entry listesi</b> arkaplandaki bir servise iletilir ve burada
+            html, pdf ve zip çıktıları oluşturulmak üzere işlenir. süreç
+            tamamlandığında pdf, html, json veya tüm bunların olduğu zip
+            arşivini indirip sözlük entrylerinizi saklayabilirsiniz.
+          </p>
+
+          <p class="has-text-white py-2">
+            <b>açık kaynak kodlu</b> bir proje olarak geliştirilen entry
+            yedekleme aparatının gelişimine katkıda bulunmak ya da
+            sorun/hata/öneri bildiriminde bulunmak için kaynak bağlantısını
+            kullanabilirsiniz:<br />
+            <span
+              ><a
+                href="https://github.com/ozgend/sozluk-entry-backup"
+                target="_blank"
+                class="has-text-primary"
+                ><i class="fab fa-github px-1"></i>sozluk-entry-backup</a
+              ></span
+            >
+          </p>
+
+          <p class="has-text-white py-2 is-size-7">
+            <i
+              >bu uygulamanın sözlük oluşumları ile resmi bir bağı yoktur.
+              uygulama kullanılarak elde edilebilecek internete açık verilerin,
+              ilgili kullanıcılara ya da platformlara karşı yasal bir
+              bağlayıcılığı bulunmamaktadır.</i
+            >
+          </p>
+        </section>
+      </div>
     </div>
+  </div>
 </template>
 
 <script>
 export default {
-    name: "InfoBar",
-    data: function () {
-        return {
-            isInfoVisible: false,
-        };
-    },
+  name: "InfoBar",
+  data: function () {
+    return {
+      isInfoVisible: false,
+    };
+  },
 };
 </script>

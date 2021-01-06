@@ -2,6 +2,7 @@ const scrape = require('scrape-it');
 
 const userNotFound = 'Böyle bir kullanıcı bulunamadı';
 const userNotExist = 'isimli bir üyemiz yok!!';
+const userInactive = 'hiçbir etkileşim bulunamadı!!';
 
 const contentMappingOptions = {
     entries: {
@@ -26,7 +27,7 @@ const contentMappingOptions = {
             content: 'a'
         }
     },
-    alert: 'div.alert'
+    error: 'div.alert'
 };
 
 const getPageUrl = (urlTemplate, username, page) => {
@@ -36,11 +37,14 @@ const getPageUrl = (urlTemplate, username, page) => {
 const parsePage = async (urlTemplate, username, page) => {
     const url = getPageUrl(urlTemplate, username, page);
     const response = await scrape(url, contentMappingOptions);
-    const hasAlert = response.data.alert && (response.data.alert.indexOf(userNotExist) > -1 || response.data.alert.indexOf(userNotFound) > -1);
+    const hasError = response.data.error && (
+        response.data.error.indexOf(userNotExist) > -1 ||
+        response.data.error.indexOf(userNotFound) > -1 ||
+        response.data.error.indexOf(userInactive) > -1);
 
-    if (hasAlert) {
+    if (hasError) {
         return {
-            error: response.data.alert,
+            error: response.data.error.split('!')[0],
             availableMaxPage: -1,
             entries: [],
             page,
@@ -94,10 +98,10 @@ const downloadUserEntries = async (options, onProgressListener, cancellationHand
             onProgressListener({ currentPage, maxPage: options.maxPage, entries: result.entries, entryCount });
         }
 
-        //console.log(`++ parsed ${currentPage}/${options.maxPage} @ ${result.url}`);
+        //console.debug(`++ parsed ${currentPage}/${options.maxPage} @ ${result.url}`);
 
         if (currentPage == options.maxPage) {
-            //console.log(`finished ${currentPage}/${options.maxPage}`);
+            //console.debug(`finished ${currentPage}/${options.maxPage}`);
             return { completed: true, pageCount: options.maxPage, entryCount };
         }
 

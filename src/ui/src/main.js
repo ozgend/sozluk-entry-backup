@@ -3,8 +3,11 @@ import App from "./App.vue";
 import VueSocketIoExt from "vue-socket.io-extended";
 import io from "socket.io-client";
 
-const socket = io("ws://localhost:4040");
+const wsUrl = `ws://${process.env.VUE_APP_API_HOST || location.host}`;
+const socket = io(wsUrl);
 Vue.use(VueSocketIoExt, socket);
+
+console.log(`wsUrl: ${wsUrl}`);
 
 Vue.config.productionTip = false;
 
