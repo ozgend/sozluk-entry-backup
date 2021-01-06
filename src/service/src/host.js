@@ -8,9 +8,9 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
-        origin: "http://localhost:8080",
-        allowedHeaders: ["Authorization", "Content-Type", "Accept"],
-        methods: ["GET", "POST"],
+        origin: process.env.HOST || '*',
+        allowedHeaders: ['Authorization', 'Content-Type', 'Accept'],
+        methods: ['GET', 'POST'],
         credentials: true
     }
 });
@@ -25,6 +25,8 @@ fs.mkdirSync(getDataPath('temp'));
 
 const pdfOptions = { format: 'A4', printBackground: true };
 const pdfConverter = require('html-pdf-node');
+const PDFKit = require('pdfkit');
+const cheerio = require('cheerio');
 
 const Vue = require('vue');
 const { clear } = require('console');
@@ -95,7 +97,7 @@ const createTemporaryStorage = (socket) => {
 };
 
 const removeTemporaryStorage = (socket) => {
-    const folder = getDataPath('./temp', socket.id);
+    const folder = getDataPath('temp', socket.id);
     fs.rmSync(folder, { recursive: true, force: true });
     console.warn(`+ removeTemporaryStorage [${socket.id}] -> ${folder}`);
     clearTemporaryStorage(socket);
@@ -135,41 +137,17 @@ const render = async (socket, data) => {
         // const filename = `entries_${data.username.replace(/\s/g, '-')}_${timestamp}`;
         const filename = `entries`;
 
-        // write json
-        const jsonContent = JSON.stringify(context.entries);
-        const jsonFilename = `${filename}.json`;
-        fs.writeFileSync(getDataPath('temp', socket.id, jsonFilename), jsonContent, 'utf8');
+        const json = await outputJson(socket.id, context, filename);
 
-        // write html
-        const app = new Vue({
-            data: context,
-            template: templateEntriesContent,
-        });
+        const html = await outputHtml(socket.id, context, filename);
 
-        const htmlContent = await templateRenderer.renderToString(app, context);
-        const htmlFilename = `${filename}.html`;
-        fs.writeFileSync(getDataPath('temp', socket.id, htmlFilename), htmlContent, 'utf8');
+        const pdf1 = await outputConvertedPdf(socket.id, html.content, filename);
 
-        // write pdf
-        const pdfContent = await pdfConverter.generatePdf({ content: htmlContent }, pdfOptions);
-        const pdfFilename = `${filename}.pdf`;
-        fs.writeFileSync(getDataPath('temp', socket.id, pdfFilename), pdfContent);
+        const pdf2 = await outputGeneratedPdf(socket.id, context, filename, html.content);
 
-        // create zip
-        const zip = new JSZip();
-        zip.file(jsonFilename, jsonContent);
-        zip.file(htmlFilename, htmlContent);
-        zip.file(pdfFilename, pdfContent);
-        const zipFilename = `${filename}.zip`;
-        zip.generateNodeStream({
-            type: 'nodebuffer',
-            compression: 'STORE',
-            streamFiles: true
-        }).pipe(fs.createWriteStream(getDataPath('temp', socket.id, zipFilename)));
+        const zip = await outputZip(socket.id, filename, json, html, pdf1, pdf2);
 
-        const renderResult = {
-            pdfFilename, htmlFilename, jsonFilename, zipFilename
-        };
+        const renderResult = [json.file, html.file, pdf1.file, pdf2.file, zip.file];
 
         clearTemporaryStorage(socket);
 
@@ -179,4 +157,83 @@ const render = async (socket, data) => {
     catch (err) {
         console.error(err);
     }
+};
+
+const outputJson = async (id, context, filename) => {
+    const content = JSON.stringify(context.entries);
+    const file = `${filename}.json`;
+    fs.writeFileSync(getDataPath('temp', id, file), content, 'utf8');
+    return { file };
+};
+
+const outputHtml = async (id, context, filename) => {
+    const app = new Vue({
+        data: context,
+        template: templateEntriesContent,
+    });
+
+    const content = await templateRenderer.renderToString(app, context);
+    const file = `${filename}.html`;
+    fs.writeFileSync(getDataPath('temp', id, file), content, 'utf8');
+    return { content, file };
+};
+
+const outputConvertedPdf = async (id, htmlContent, filename) => {
+    // write pdf
+    const content = await pdfConverter.generatePdf({ content: htmlContent }, pdfOptions);
+    const file = `${filename}_converted.pdf`;
+    fs.writeFileSync(getDataPath('temp', id, file), content);
+    return { file };
+};
+
+const outputGeneratedPdf = async (id, context, filename, htmlContent) => {
+    const file = `${filename}_generated.pdf`;
+
+    const document = new PDFKit({
+        autoFirstPage: true,
+        bufferPages: true,
+        size: 'A4',
+        layout: 'portrait',
+        margin: 20
+    });
+
+    document.registerFont('OpenSans', getDataPath('templates', 'OpenSans-Regular.ttf'));
+    document.registerFont('OpenSans-Bold', getDataPath('templates', 'OpenSans-Bold.ttf'));
+
+    document.pipe(fs.createWriteStream(getDataPath('temp', id, file)));
+    document.font('OpenSans-Bold').fillColor('#424242').fontSize(24).text(`${context.username} | ${context.entries.length} entry`);
+    document.moveDown(3);
+
+    context.entries.forEach(entry => {
+        const entryText = cheerio.load(entry.content).root().text().toLocaleLowerCase();
+
+        document.lineWidth(1).lineCap('butt').moveTo(document.x, document.y).lineTo(document.page.width - document.page.margins.right, document.y).fillAndStroke('#dadada');
+        document.moveDown(2)
+        document.font('OpenSans-Bold').fillColor('#4b6d8d').fontSize(20).text(entry.title,);
+        document.font('OpenSans').fillColor('#646464').fontSize(12).text(`${entry.id} @ ${entry.date}`, { link: `https://${entry.url}` });
+        document.moveDown();
+        document.font('OpenSans').fillColor('#424242').fontSize(14).text(entryText);
+        document.moveDown(3);
+    });
+
+    document.end();
+    return { file };
+};
+
+const outputZip = async (id, filename, ...outputs) => {
+    const zip = new JSZip();
+
+    outputs.forEach(output => {
+        zip.file(output.file, output.content);
+    });
+
+    const file = `${filename}_archive.zip`;
+
+    zip.generateNodeStream({
+        type: 'nodebuffer',
+        compression: 'STORE',
+        streamFiles: true
+    }).pipe(fs.createWriteStream(getDataPath('temp', id, file)));
+
+    return { file };
 };

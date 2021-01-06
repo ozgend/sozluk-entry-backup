@@ -4,15 +4,17 @@
   "description": "entry-backup service",
   "author": "ozgend",
   "scripts": {
+    "start": "node ./src/host.js",
     "service:start": "node ./src/host.js",
     "service:mon": "nodemon ./src/host.js"
   },
   "dependencies": {
+    "cheerio": "^1.0.0-rc.5",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "html-pdf-node": "^1.0.7",
     "jszip": "^3.5.0",
-    "nodemon": "^2.0.6",
+    "pdfkit": "^0.11.0",
     "socket.io": "^3.0.4",
     "vue": "^2.6.12",
     "vue-server-renderer": "^2.6.12"
