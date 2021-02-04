@@ -15,9 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-node@master
-        with:
-          node-version: "14.x"
-      - run: npm install --production
+      - run: npm install
+      - run: lerna bootstrap
       - run: lerna run ui:build --stream
       - run: lerna run ui:publish --stream
       - uses: AkhileshNS/heroku-deploy@v3.10.9

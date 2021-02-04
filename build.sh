@@ -1,5 +1,5 @@
 #! /bin/bash
 
-npm install --production --silent
+npm install --silent
 lerna run ui:build --stream
 lerna run ui:publish --stream
