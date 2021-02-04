@@ -13,10 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-node@master
-      - run: npm install lerna
-      - run: lerna bootstrap
-      - run: lerna run ui:build --stream
-      - run: lerna run ui:publish --stream
+      - run: npm install yarn
+      - run: yarn install
+      - run: yarn ui:build
+      - run: yarn ui:deploy
+
       - uses: AkhileshNS/heroku-deploy@v3.10.9
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
