@@ -11,6 +11,7 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.5",
     "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "html-pdf-node": "^1.0.7",
     "jszip": "^3.5.0",

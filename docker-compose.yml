@@ -1,0 +1,14 @@
+version: "3.4"
+
+services:
+  entry-backup-service:
+    image: entry-backup-service
+    build:
+      context: src/service
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 80
+      HOST: localhost:3000
+    ports:
+      - 3000:80

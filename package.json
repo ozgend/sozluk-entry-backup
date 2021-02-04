@@ -2,7 +2,8 @@
   "name": "root",
   "private": true,
   "scripts": {
-    "ui-deploy": "lerna run ui:build && lerna run ui:publish"
+    "deploy": "lerna run ui:build --stream && lerna run ui:publish --stream",
+    "host": "lerna run service:host"
   },
   "devDependencies": {
     "lerna": "^3.22.1"
