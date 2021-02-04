@@ -1,0 +1,27 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@master
+        with:
+          node-version: "14.x"
+      - run: npm install --production
+      - run: lerna run ui:build --stream
+      - run: lerna run ui:publish --stream
+      - uses: AkhileshNS/heroku-deploy@v3.10.9
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
