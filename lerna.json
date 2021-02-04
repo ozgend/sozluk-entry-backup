@@ -2,8 +2,7 @@
   "packages": [
     "src/*"
   ],
-  "scripts": {
-    "ui-deploy": "lerna run ui:build && lerna run ui:publish"
-  },
-  "version": "0.0.0"
+  "npmClient": "yarn",
+  "useWorkspaces": true,
+  "version": "independent"
 }

@@ -1,9 +1,14 @@
 {
-  "name": "root",
+  "name": "entry-backup",
   "private": true,
+  "workspaces": [
+    "src/*"
+  ],
   "scripts": {
-    "deploy": "lerna run ui:build --stream && lerna run ui:publish --stream",
-    "host": "lerna run service:host"
+    "ui:build": "yarn workspace @entry-backup/ui build",
+    "ui:deploy": "yarn workspace @entry-backup/ui deploy",
+    "service:start": "yarn workspace @entry-backup/service start",
+    "service:serve": "yarn workspace @entry-backup/service serve"
   },
   "devDependencies": {
     "lerna": "^3.22.1"

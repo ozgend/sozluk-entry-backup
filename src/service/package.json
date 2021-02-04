@@ -1,12 +1,11 @@
 {
-  "name": "entry-backup-service",
+  "name": "@entry-backup/service",
   "version": "0.1.0",
   "description": "entry-backup service",
   "author": "ozgend",
   "scripts": {
     "start": "node ./src/host.js",
-    "service:start": "node ./src/host.js",
-    "service:mon": "nodemon ./src/host.js"
+    "serve": "nodemon ./src/host.js"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.5",
