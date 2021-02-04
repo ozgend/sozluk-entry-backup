@@ -3,8 +3,6 @@ name: Build & Deploy
 on:
   push:
     branches: [master]
-  pull_request:
-    branches: [master]
 
   workflow_dispatch:
 
@@ -15,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-node@master
-      - run: npm install
+      - run: npm install -g lerna
       - run: lerna bootstrap
       - run: lerna run ui:build --stream
       - run: lerna run ui:publish --stream
