@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-node@master
-      - run: npm install
+      - run: npm install lerna
       - run: lerna bootstrap
       - run: lerna run ui:build --stream
       - run: lerna run ui:publish --stream
