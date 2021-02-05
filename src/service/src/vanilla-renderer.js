@@ -2,7 +2,7 @@ const vanillaHtmlRenderer = (templates, data) => {
     const mainHtml = buildMainHtml(templates.index, {
         username: data.username,
         userinfo: data.userinfo,
-        length: data.entries.length,
+        count: data.entries.length,
         date: new Date().toLocaleString()
     });
     const entriesHtml = buildEntriesHtml(templates.entries, data.entries).join('\n');
@@ -13,7 +13,7 @@ const buildMainHtml = (template, data) => {
     return template
         .replace(/{{ username }}/g, data.username)
         .replace('{{ userinfo }}', data.userinfo)
-        .replace('{{ length }}', data.length)
+        .replace(/{{ count }}/g, data.count)
         .replace('{{ date }}', data.date);
 };
 
