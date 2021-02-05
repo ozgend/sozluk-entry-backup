@@ -8,3 +8,9 @@ services:
       dockerfile: ./Dockerfile
     environment:
       NODE_ENV: production
+      PORT: 80
+      HOST: localhost:3000
+    volumes:
+      - "./src/service/temp:/usr/src/app/temp"
+    ports:
+      - 3000:80

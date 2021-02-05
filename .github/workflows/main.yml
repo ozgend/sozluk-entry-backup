@@ -26,19 +26,28 @@ jobs:
       - name: deploy ui
         run: yarn ui:deploy
 
-      # - name: publish to heroku
-      #   env:
-      #     HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-      #     HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
-      #     HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
-      #   if: github.ref == 'refs/heads/master' && job.status == 'success'
-      #   run: git push https://$HEROKU_EMAIL:$HEROKU_API_TOKEN@git.heroku.com/$HEROKU_APP_NAME.git origin/master:master --force
-      
-      - name: publish to heroku
-        uses: akhileshns/heroku-deploy@v3.10.9 # This is the action
-        with:
-          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-          heroku_email: ${{ secrets.HEROKU_EMAIL }}
-          remote_branch: master
-          dontuseforce: true
+      # - name: deploy container to heroku
+      #   uses: akhileshns/heroku-deploy@v3.10.9
+      #   with:
+      #     heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+      #     heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+      #     heroku_email: ${{ secrets.HEROKU_EMAIL }}
+      #     usedocker: true
+
+      - name: login to heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: heroku container:login
+
+      - name: cd context
+        run: cd ./src/service
+
+      - name: push to heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: heroku container:push -a ${{ secrets.HEROKU_APP_NAME }} web
+
+      - name: release
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: heroku container:release -a ${{ secrets.HEROKU_APP_NAME }} web
