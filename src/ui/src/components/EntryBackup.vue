@@ -8,6 +8,7 @@
                     <h1 class="title is-size-2 my-4">
                         entry yedekleme aparatı
                     </h1>
+
                     <h2 class="subtitle container my-4">
                         <div class="field">
                             <div class="control">
@@ -60,7 +61,15 @@
                                 </button>
                             </p>
                         </div>
-                        <h3 class="title is-size-5">{{ profileUrl }}</h3>
+                        <span class="title is-size-5" v-if="hasUsername"
+                            >{{ profileUrl }}
+                            <a :href="'https://' + profileUrl" target="_blank">
+                                <i class="fas fa-external-link-alt"></i> </a
+                        ></span>
+                        <br />
+                        <span class="title is-size-6" v-if="hasUsername">{{
+                            userinfo
+                        }}</span>
                     </div>
 
                     <div v-if="isError">
@@ -75,8 +84,11 @@
                         <p class="my-4">
                             <span
                                 >sayfa # {{ progress.currentPage }} /
-                                {{ progress.maxPage }} -
-                                {{ progress.entryCount }} entry</span
+                                {{ progress.maxPage }} </span
+                            ><br />
+                            <span
+                                >entry # {{ progress.entryCount }} /
+                                {{ progress.maxEntryCount }}</span
                             >
                         </p>
 
@@ -89,7 +101,7 @@
                         </progress>
                     </div>
 
-                    <div v-if="isPreparingFiles">
+                    <div v-show="isPreparingFiles">
                         <p class="my-4">
                             <i class="fas fa-copy mx-1"></i>
                             <span
@@ -159,6 +171,7 @@ const _progress = {
     maxPage: 0,
     value: 0,
     entryCount: 0,
+    maxEntryCount: 0,
 };
 
 export default {
@@ -177,6 +190,7 @@ export default {
             domains: _domains,
             selectedDomainId: "uludag",
             username: null,
+            userinfo: null,
             renderResult: null,
         };
     },
@@ -219,8 +233,10 @@ export default {
         },
     },
     methods: {
-        resetProgress() {
-            this.progress = Object.assign({}, _progress);
+        resetState(keepProgress) {
+            if (!keepProgress) {
+                this.progress = Object.assign({}, _progress);
+            }
             this.isCompleted = false;
             this.isBusy = false;
             this.isError = false;
@@ -228,6 +244,7 @@ export default {
             this.isPreparingFiles = false;
             this.isDownloadReady = false;
             this.renderResult = null;
+            this.userinfo = null;
         },
 
         resetCancellation() {
@@ -235,7 +252,7 @@ export default {
         },
 
         async getUserEntries() {
-            this.resetProgress();
+            this.resetState();
             this.resetCancellation();
             this.isBusy = true;
 
@@ -249,7 +266,7 @@ export default {
             );
 
             if (result.error) {
-                this.resetProgress();
+                this.resetState();
                 this.isError = true;
                 this.errorMessage = result.error;
             }
@@ -267,10 +284,11 @@ export default {
                 data
             );
 
+            this.userinfo = data.userinfo;
             this.$socket.client.emit("onSyncChunk", data.entries);
 
             if (this.progress.currentPage === this.progress.maxPage) {
-                this.resetProgress();
+                this.resetState(true);
                 this.isCompleted = true;
                 this.beginRender();
                 return;
@@ -292,6 +310,7 @@ export default {
             this.isPreparingFiles = true;
             this.$socket.client.emit("onBeginRender", {
                 username: this.username,
+                userinfo: this.userinfo,
             });
         },
     },

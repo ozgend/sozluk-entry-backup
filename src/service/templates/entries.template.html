@@ -3,6 +3,9 @@
     {{ username }} - {{ entries.length }} entry |
     {{ new Date().toLocaleString() }}
   </h2>
+  <h3>
+    {{ userinfo }}
+  </h3>
   <ul class="is-full entries">
     <li v-for="entry in entries" :key="entry.id">
       <h3 class="title">{{ entry.title }}</h3>
