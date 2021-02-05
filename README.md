@@ -6,6 +6,7 @@ kullanicinin sozluk profil sayfasinda yer alan entryleri yedekleyen bir crawler.
 - ssr html output (opt. vue-ssr)
 - pdf output (opt. pdfkit)
 - pause/resume option
+- rendering queue
 
 ### local run / compose
 ```bash
