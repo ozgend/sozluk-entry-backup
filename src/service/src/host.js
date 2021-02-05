@@ -16,7 +16,6 @@ const io = require('socket.io')(http, {
     }
 });
 
-
 const getDataPath = (...paths) => {
     return path.join(path.dirname(__dirname), ...paths);
 }
@@ -24,17 +23,9 @@ const getDataPath = (...paths) => {
 fs.rmSync(getDataPath('temp'), { force: true, recursive: true });
 fs.mkdirSync(getDataPath('temp'));
 
-const pdfOptions = { format: 'A4', printBackground: true };
-const pdfConverter = require('html-pdf-node');
-const cheerio = require('cheerio');
-
-const Vue = require('vue');
-const { clear } = require('console');
-const templateIndexContent = fs.readFileSync(getDataPath('templates', 'index.template.html'), 'utf8');
-const templateEntriesContent = fs.readFileSync(getDataPath('templates', 'entries.template.html'), 'utf8');
-const templateRenderer = require('vue-server-renderer').createRenderer({
-    template: templateIndexContent
-});
+const templateIndexContent = fs.readFileSync(getDataPath('templates', 'index.vtemp.html'), 'utf8');
+const templateEntriesContent = fs.readFileSync(getDataPath('templates', 'entries.vtemp.html'), 'utf8');
+const { vanillaHtmlRenderer } = require('./vanilla-renderer');
 
 const port = process.env.PORT || 4040;
 const staticFiles = getDataPath('public');
@@ -142,11 +133,9 @@ const render = async (socket, data) => {
 
         const html = await outputHtml(socket.id, context, filename);
 
-        const pdf = await outputConvertedPdf(socket.id, html.content, filename);
+        const zip = await outputZip(socket.id, filename, json, html);
 
-        const zip = await outputZip(socket.id, filename, json, html, pdf);
-
-        const renderResult = [json.file, html.file, pdf.file, zip.file];
+        const renderResult = [json.file, html.file, zip.file];
 
         clearTemporaryStorage(socket);
 
@@ -159,30 +148,17 @@ const render = async (socket, data) => {
 };
 
 const outputJson = async (id, context, filename) => {
-    const content = JSON.stringify(context.entries);
+    const content = JSON.stringify(context.entries, null, 2);
     const file = `${filename}.json`;
     fs.writeFileSync(getDataPath('temp', id, file), content, 'utf8');
     return { file };
 };
 
 const outputHtml = async (id, context, filename) => {
-    const app = new Vue({
-        data: context,
-        template: templateEntriesContent,
-    });
-
-    const content = await templateRenderer.renderToString(app, context);
+    const content = await vanillaHtmlRenderer({ index: templateIndexContent, entries: templateEntriesContent }, context);
     const file = `${filename}.html`;
     fs.writeFileSync(getDataPath('temp', id, file), content, 'utf8');
     return { content, file };
-};
-
-const outputConvertedPdf = async (id, htmlContent, filename) => {
-    // write pdf
-    const content = await pdfConverter.generatePdf({ content: htmlContent }, pdfOptions);
-    const file = `${filename}_converted.pdf`;
-    fs.writeFileSync(getDataPath('temp', id, file), content);
-    return { file };
 };
 
 const outputZip = async (id, filename, ...outputs) => {

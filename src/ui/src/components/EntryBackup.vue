@@ -130,9 +130,7 @@
                         <p class="my-3">
                             <i class="fas fa-file-export mx-1"></i>
                             <span class="px-1">
-                                pdf, html, json dosyalarını ya da hepsini içeren
-                                zip arşivini aşağıdaki bağlantılardan
-                                indirebilirsiniz.
+                                dosyaları aşağıdaki bağlantılardan indirebilirsiniz.
                                 <br />
                                 <i class="has-text-warning"
                                     >yedeklenen dosyalar sayfadan ayrılana kadar
