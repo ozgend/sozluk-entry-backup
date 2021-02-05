@@ -26,7 +26,6 @@ fs.mkdirSync(getDataPath('temp'));
 
 const pdfOptions = { format: 'A4', printBackground: true };
 const pdfConverter = require('html-pdf-node');
-const PDFKit = require('pdfkit');
 const cheerio = require('cheerio');
 
 const Vue = require('vue');
@@ -143,13 +142,11 @@ const render = async (socket, data) => {
 
         const html = await outputHtml(socket.id, context, filename);
 
-        const pdf1 = await outputConvertedPdf(socket.id, html.content, filename);
+        const pdf = await outputConvertedPdf(socket.id, html.content, filename);
 
-        const pdf2 = await outputGeneratedPdf(socket.id, context, filename, html.content);
+        const zip = await outputZip(socket.id, filename, json, html, pdf);
 
-        const zip = await outputZip(socket.id, filename, json, html, pdf1, pdf2);
-
-        const renderResult = [json.file, html.file, pdf1.file, pdf2.file, zip.file];
+        const renderResult = [json.file, html.file, pdf.file, zip.file];
 
         clearTemporaryStorage(socket);
 
@@ -185,40 +182,6 @@ const outputConvertedPdf = async (id, htmlContent, filename) => {
     const content = await pdfConverter.generatePdf({ content: htmlContent }, pdfOptions);
     const file = `${filename}_converted.pdf`;
     fs.writeFileSync(getDataPath('temp', id, file), content);
-    return { file };
-};
-
-const outputGeneratedPdf = async (id, context, filename, htmlContent) => {
-    const file = `${filename}_generated.pdf`;
-
-    const document = new PDFKit({
-        autoFirstPage: true,
-        bufferPages: true,
-        size: 'A4',
-        layout: 'portrait',
-        margin: 20
-    });
-
-    document.registerFont('OpenSans', getDataPath('templates', 'OpenSans-Regular.ttf'));
-    document.registerFont('OpenSans-Bold', getDataPath('templates', 'OpenSans-Bold.ttf'));
-
-    document.pipe(fs.createWriteStream(getDataPath('temp', id, file)));
-    document.font('OpenSans-Bold').fillColor('#424242').fontSize(24).text(`${context.username} | ${context.entries.length} entry`);
-    document.moveDown(3);
-
-    context.entries.forEach(entry => {
-        const entryText = cheerio.load(entry.content).root().text().toLocaleLowerCase();
-
-        document.lineWidth(1).lineCap('butt').moveTo(document.x, document.y).lineTo(document.page.width - document.page.margins.right, document.y).fillAndStroke('#dadada');
-        document.moveDown(2)
-        document.font('OpenSans-Bold').fillColor('#4b6d8d').fontSize(20).text(entry.title,);
-        document.font('OpenSans').fillColor('#646464').fontSize(12).text(`${entry.id} @ ${entry.date}`, { link: `https://${entry.url}` });
-        document.moveDown();
-        document.font('OpenSans').fillColor('#424242').fontSize(14).text(entryText);
-        document.moveDown(3);
-    });
-
-    document.end();
     return { file };
 };
 
