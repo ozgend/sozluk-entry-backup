@@ -68,7 +68,7 @@
                         ></span>
                         <br />
                         <span class="title is-size-6" v-if="hasUsername">{{
-                            userinfo
+                            progress.userinfo
                         }}</span>
                     </div>
 
@@ -129,10 +129,17 @@
 
                         <p class="my-3">
                             <i class="fas fa-file-export mx-1"></i>
-                            <span class="px-1"
-                                >pdf, html, json ya da hepsini içeren zip
-                                dosyasını aşağıdaki bağlantılardan
-                                kaydedebilirsiniz.
+                            <span class="px-1">
+                                pdf, html, json dosyalarını ya da hepsini içeren
+                                zip arşivini aşağıdaki bağlantılardan
+                                indirebilirsiniz.
+                                <br />
+                                <i class="has-text-warning"
+                                    >yedeklenen dosyalar sayfadan ayrılana kadar
+                                    sunucuda saklanmaktadır. indirmeden sayfadan
+                                    ayrılmanız durumunda baştan başlamanız
+                                    gerekir.
+                                </i>
                             </span>
                         </p>
 
@@ -170,6 +177,7 @@ const _progress = {
     currentPage: 0,
     maxPage: 0,
     value: 0,
+    userinfo: "",
     entryCount: 0,
     maxEntryCount: 0,
 };
@@ -190,7 +198,6 @@ export default {
             domains: _domains,
             selectedDomainId: "uludag",
             username: null,
-            userinfo: null,
             renderResult: null,
         };
     },
@@ -244,7 +251,6 @@ export default {
             this.isPreparingFiles = false;
             this.isDownloadReady = false;
             this.renderResult = null;
-            this.userinfo = null;
         },
 
         resetCancellation() {
@@ -284,7 +290,6 @@ export default {
                 data
             );
 
-            this.userinfo = data.userinfo;
             this.$socket.client.emit("onSyncChunk", data.entries);
 
             if (this.progress.currentPage === this.progress.maxPage) {
@@ -310,7 +315,7 @@ export default {
             this.isPreparingFiles = true;
             this.$socket.client.emit("onBeginRender", {
                 username: this.username,
-                userinfo: this.userinfo,
+                userinfo: this.progress.userinfo,
             });
         },
     },
