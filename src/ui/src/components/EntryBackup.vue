@@ -89,7 +89,7 @@
                         </progress>
                     </div>
 
-                    <div v-if="isPreparingFiles">
+                    <div v-show="isPreparingFiles">
                         <p class="my-4">
                             <i class="fas fa-copy mx-1"></i>
                             <span
@@ -219,8 +219,10 @@ export default {
         },
     },
     methods: {
-        resetProgress() {
-            this.progress = Object.assign({}, _progress);
+        resetState(keepProgress) {
+            if (!keepProgress) {
+                this.progress = Object.assign({}, _progress);
+            }
             this.isCompleted = false;
             this.isBusy = false;
             this.isError = false;
@@ -235,7 +237,7 @@ export default {
         },
 
         async getUserEntries() {
-            this.resetProgress();
+            this.resetState();
             this.resetCancellation();
             this.isBusy = true;
 
@@ -249,7 +251,7 @@ export default {
             );
 
             if (result.error) {
-                this.resetProgress();
+                this.resetState();
                 this.isError = true;
                 this.errorMessage = result.error;
             }
@@ -270,7 +272,7 @@ export default {
             this.$socket.client.emit("onSyncChunk", data.entries);
 
             if (this.progress.currentPage === this.progress.maxPage) {
-                this.resetProgress();
+                this.resetState(true);
                 this.isCompleted = true;
                 this.beginRender();
                 return;
