@@ -8,7 +8,8 @@
     "ui:build": "yarn workspace @entry-backup/ui build",
     "ui:deploy": "yarn workspace @entry-backup/ui deploy",
     "service:start": "yarn workspace @entry-backup/service start",
-    "service:serve": "yarn workspace @entry-backup/service serve"
+    "service:serve": "yarn workspace @entry-backup/service serve",
+    "start": "yarn workspace @entry-backup/service start"
   },
   "devDependencies": {
     "lerna": "^3.22.1"
