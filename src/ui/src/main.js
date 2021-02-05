@@ -3,6 +3,7 @@ import App from "./App.vue";
 import VueSocketIoExt from "vue-socket.io-extended";
 import io from "socket.io-client";
 
+document.title = 'entry backup';
 const wsUrl = `${location.protocol.replace('http', 'ws')}//${process.env.VUE_APP_API_HOST || location.host}`;
 const socket = io(wsUrl);
 Vue.use(VueSocketIoExt, socket);
