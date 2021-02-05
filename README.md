@@ -2,6 +2,11 @@
 kullanicinin sozluk profil sayfasinda yer alan entryleri yedekleyen bir crawler. 
 
 
+### todo
+- ssr html output (opt. vue-ssr)
+- pdf output (opt. pdfkit)
+- pause/resume option
+
 ### local run / compose
 ```bash
 docker-compose -f docker-compose.local.yml run

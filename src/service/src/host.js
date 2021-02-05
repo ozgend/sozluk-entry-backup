@@ -116,7 +116,8 @@ const render = async (socket, data) => {
                 .replace(/(href="\/zlib)/gi, 'href="https://uludagsozluk.com/zlib')
                 .replace(/(href="\/\/)/g, 'href="https://')
                 .replace(/(src="\/\/)/g, 'href="https://')
-                .replace(/http:\/\//g, 'https://');
+                .replace(/http:\/\//g, 'https://')
+                .replace(/<img href=/g, '<img src=');
             return e;
         });
 
