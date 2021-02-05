@@ -52,9 +52,9 @@
 
                     <p class="has-text-white py-2">
                         <b> entry listesi</b> arkaplandaki bir servise iletilir
-                        ve burada json (yakinda html, pdf) ve zip çıktıları oluşturulmak üzere
-                        işlenir. süreç tamamlandığında dosyaları indirip
-                        sözlük entrylerinizi kaydedebilirsiniz.
+                        ve burada json, html ve zip çıktıları oluşturulmak üzere
+                        işlenir. süreç tamamlandığında dosyaları indirip sözlük
+                        entrylerinizi kaydedebilirsiniz.
 
                         <i class="has-text-warning"
                             >yedeklenen dosyalar sayfadan ayrılana kadar
@@ -65,8 +65,8 @@
 
                     <p class="has-text-white py-2">
                         <b>açık kaynak kodlu</b> bir proje olarak geliştirilen
-                        entry yedekleme aparatının gelişimine katkıda bulunmak
-                        ya da sorun/hata/öneri bildiriminde bulunmak için kaynak
+                        entry yedekleme aparatının gelişimine katkı saglamak ya
+                        da sorun/hata/öneri bildiriminde bulunmak için kaynak
                         bağlantısını kullanabilirsiniz:<br />
                         <span
                             ><a
