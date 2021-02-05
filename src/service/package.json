@@ -5,7 +5,7 @@
   "author": "ozgend",
   "scripts": {
     "start": "node ./src/host.js",
-    "serve": "nodemon ./src/host.js"
+    "serve": "node ./src/host.js"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.5",
