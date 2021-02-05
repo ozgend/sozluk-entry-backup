@@ -52,9 +52,8 @@
 
                     <p class="has-text-white py-2">
                         <b> entry listesi</b> arkaplandaki bir servise iletilir
-                        ve burada html, pdf ve zip çıktıları oluşturulmak üzere
-                        işlenir. süreç tamamlandığında pdf, html, json
-                        dosyalarını ya da hepsini içeren zip arşivini indirip
+                        ve burada json (yakinda html, pdf) ve zip çıktıları oluşturulmak üzere
+                        işlenir. süreç tamamlandığında dosyaları indirip
                         sözlük entrylerinizi kaydedebilirsiniz.
 
                         <i class="has-text-warning"
