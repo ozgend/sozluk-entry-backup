@@ -42,11 +42,11 @@ jobs:
       - name: push to heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:push web
+        run: heroku container:push -a ${{ secrets.HEROKU_APP_NAME }} web
         working-directory: ./src/service
 
       - name: release
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:release web
+        run: heroku container:release -a ${{ secrets.HEROKU_APP_NAME }} web
         working-directory: ./src/service
