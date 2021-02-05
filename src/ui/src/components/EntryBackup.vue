@@ -130,7 +130,8 @@
                         <p class="my-3">
                             <i class="fas fa-file-export mx-1"></i>
                             <span class="px-1">
-                                dosyaları aşağıdaki bağlantılardan indirebilirsiniz.
+                                dosyaları aşağıdaki bağlantılardan
+                                indirebilirsiniz.
                                 <br />
                                 <i class="has-text-warning"
                                     >yedeklenen dosyalar sayfadan ayrılana kadar
@@ -197,6 +198,7 @@ export default {
             selectedDomainId: "uludag",
             username: null,
             renderResult: null,
+            stats: {},
         };
     },
     sockets: {
@@ -206,6 +208,12 @@ export default {
         onSyncSid(sid) {
             console.debug(`++ onSyncSid sid=${sid}`);
             this.sid = sid;
+        },
+        onUpdateStats(stats) {
+            this.stats = stats;
+            console.log(
+                `active: ${stats.active} @ queue: ${stats.line}/${stats.queue}`
+            );
         },
         onRenderCompleted(result) {
             console.debug(`++ onRenderCompleted`);

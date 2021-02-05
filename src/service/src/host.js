@@ -20,6 +20,8 @@ const getDataPath = (...paths) => {
     return path.join(path.dirname(__dirname), ...paths);
 }
 
+const stats = { active: 0, queue: 0 };
+
 fs.rmSync(getDataPath('temp'), { force: true, recursive: true });
 fs.mkdirSync(getDataPath('temp'));
 
@@ -46,6 +48,13 @@ app.get('/download/:sid/:filename?', (req, res) => {
 io.on('connection', (socket) => {
     console.log(`+ connected ${socket.id}`);
     socket.emit('onSyncSid', socket.id);
+    stats.active++;
+
+    setInterval(() => {
+        socket.emit('onUpdateStats', Object.assign({ line: 0, priority: 0 }, stats));
+    }, 1000);
+
+
 
     createTemporaryStorage(socket);
 
@@ -71,6 +80,7 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log(`+ disconnected ${socket.id}`);
         removeTemporaryStorage(socket);
+        stats.active--;
     });
 });
 
@@ -116,7 +126,8 @@ const render = async (socket, data) => {
                 .replace(/(href="\/zlib)/gi, 'href="https://uludagsozluk.com/zlib')
                 .replace(/(href="\/\/)/g, 'href="https://')
                 .replace(/(src="\/\/)/g, 'href="https://')
-                .replace(/http:\/\//g, 'https://');
+                .replace(/http:\/\//g, 'https://')
+                .replace(/<img href=/g, '<img src=');
             return e;
         });
 
