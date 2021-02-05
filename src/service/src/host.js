@@ -132,6 +132,7 @@ const render = async (socket, data) => {
 
         const context = {
             username: data.username,
+            userinfo: data.userinfo,
             entries
         };
 

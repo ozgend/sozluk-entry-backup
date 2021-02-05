@@ -8,6 +8,7 @@
                     <h1 class="title is-size-2 my-4">
                         entry yedekleme aparatı
                     </h1>
+
                     <h2 class="subtitle container my-4">
                         <div class="field">
                             <div class="control">
@@ -60,7 +61,15 @@
                                 </button>
                             </p>
                         </div>
-                        <h3 class="title is-size-5">{{ profileUrl }}</h3>
+                        <span class="title is-size-5" v-if="hasUsername"
+                            >{{ profileUrl }}
+                            <a :href="'https://' + profileUrl" target="_blank">
+                                <i class="fas fa-external-link-alt"></i> </a
+                        ></span>
+                        <br />
+                        <span class="title is-size-6" v-if="hasUsername">{{
+                            userinfo
+                        }}</span>
                     </div>
 
                     <div v-if="isError">
@@ -75,8 +84,11 @@
                         <p class="my-4">
                             <span
                                 >sayfa # {{ progress.currentPage }} /
-                                {{ progress.maxPage }} -
-                                {{ progress.entryCount }} entry</span
+                                {{ progress.maxPage }} </span
+                            ><br />
+                            <span
+                                >entry # {{ progress.entryCount }} /
+                                {{ progress.maxEntryCount }}</span
                             >
                         </p>
 
@@ -159,6 +171,7 @@ const _progress = {
     maxPage: 0,
     value: 0,
     entryCount: 0,
+    maxEntryCount: 0,
 };
 
 export default {
@@ -177,6 +190,7 @@ export default {
             domains: _domains,
             selectedDomainId: "uludag",
             username: null,
+            userinfo: null,
             renderResult: null,
         };
     },
@@ -230,6 +244,7 @@ export default {
             this.isPreparingFiles = false;
             this.isDownloadReady = false;
             this.renderResult = null;
+            this.userinfo = null;
         },
 
         resetCancellation() {
@@ -269,6 +284,7 @@ export default {
                 data
             );
 
+            this.userinfo = data.userinfo;
             this.$socket.client.emit("onSyncChunk", data.entries);
 
             if (this.progress.currentPage === this.progress.maxPage) {
@@ -294,6 +310,7 @@ export default {
             this.isPreparingFiles = true;
             this.$socket.client.emit("onBeginRender", {
                 username: this.username,
+                userinfo: this.userinfo,
             });
         },
     },

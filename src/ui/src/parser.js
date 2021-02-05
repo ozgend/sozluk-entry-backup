@@ -27,6 +27,8 @@ const contentMappingOptions = {
             content: 'a'
         }
     },
+    maxEntryCount: 'div.user-menu-under-in > ul.nav > li:first-child > a',
+    userinfo: 'div.head-info-bar',
     error: 'div.alert'
 };
 
@@ -44,22 +46,28 @@ const parsePage = async (urlTemplate, username, page) => {
 
     if (hasError) {
         return {
-            error: response.data.error.split('!')[0],
-            availableMaxPage: -1,
-            entries: [],
+            url,
             page,
-            url
+            entries: [],
+            maxEntryCount: 0,
+            availableMaxPage: -1,
+            error: response.data.error.split('!')[0],
+            userinfo: '',
         };
     }
 
-    const availableMaxPage = response.data.pages.map(p => parseInt(p.content)).filter(p => p > 0).pop();
     const entries = response.data.entries;
+    const maxEntryCount = parseInt(response.data.maxEntryCount.replace(/\D/g, ''));
+    const availableMaxPage = response.data.pages.map(p => parseInt(p.content)).filter(p => p > 0).pop();
+    const userinfo = response.data.userinfo.replace(/[\r\n]\s+/g, '').trim();
 
     return {
-        entries,
-        availableMaxPage,
+        url,
         page,
-        url
+        entries,
+        maxEntryCount,
+        availableMaxPage,
+        userinfo
     };
 };
 
@@ -95,14 +103,14 @@ const downloadUserEntries = async (options, onProgressListener, cancellationHand
         }
 
         if (onProgressListener) {
-            onProgressListener({ currentPage, maxPage: options.maxPage, entries: result.entries, entryCount });
+            onProgressListener({ currentPage, maxPage: options.maxPage, entries: result.entries, entryCount, maxEntryCount: result.maxEntryCount, userinfo: result.userinfo });
         }
 
         //console.debug(`++ parsed ${currentPage}/${options.maxPage} @ ${result.url}`);
 
         if (currentPage == options.maxPage) {
             //console.debug(`finished ${currentPage}/${options.maxPage}`);
-            return { completed: true, pageCount: options.maxPage, entryCount };
+            return { completed: true, pageCount: options.maxPage, entryCount, userinfo: result.userinfo };
         }
 
         currentPage++;
