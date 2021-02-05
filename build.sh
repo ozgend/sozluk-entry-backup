@@ -1,5 +1,6 @@
 #! /bin/bash
 
-npm install --silent
-lerna run ui:build --stream
-lerna run ui:publish --stream
+yarn ui:build && yarn ui:deploy
+cd ./src/service
+heroku container:push web
+heroku container:release web
