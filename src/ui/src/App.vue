@@ -51,4 +51,11 @@ body {
         display: none;
     }
 }
+
+@media screen and (min-width: 584px) {
+    html,
+    body {
+        overflow: hidden !important;
+    }
+}
 </style>

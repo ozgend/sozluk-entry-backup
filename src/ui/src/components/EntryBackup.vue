@@ -5,33 +5,32 @@
         >
             <div class="hero-body">
                 <div class="container">
-                    <h1 class="title is-size-2 my-4">
-                        entry yedekleme aparatı
-                    </h1>
+                    <div class="mb-6">
+                        <h1 class="title is-size-2">entry yedekleme aparatı</h1>
+                    </div>
 
-                    <h2 class="subtitle container my-4">
-                        <div class="field">
-                            <div class="control">
-                                <div
-                                    class="select is-medium has-backround-dark has-text-dark"
+                    <div class="field">
+                        <div class="control">
+                            <div
+                                class="select has-backround-dark has-text-dark"
+                            >
+                                <select
+                                    v-model="selectedDomainId"
+                                    class="is-large"
+                                    :disabled="isBusy"
                                 >
-                                    <select
-                                        v-model="selectedDomainId"
-                                        class="is-large"
-                                        :disabled="isBusy"
+                                    <option
+                                        v-for="domain in domains"
+                                        v-bind:key="domain.id"
+                                        v-bind:value="domain.id"
                                     >
-                                        <option
-                                            v-for="domain in domains"
-                                            v-bind:key="domain.id"
-                                            v-bind:value="domain.id"
-                                        >
-                                            {{ domain.title }}
-                                        </option>
-                                    </select>
-                                </div>
+                                        {{ domain.title }}
+                                    </option>
+                                </select>
                             </div>
                         </div>
-                    </h2>
+                    </div>
+
                     <div v-if="selectedDomainId">
                         <div class="field has-addons">
                             <p class="control is-large">
@@ -40,36 +39,108 @@
                                     class="input is-large is-primary"
                                     type="text"
                                     placeholder="kullanıcı adı"
+                                    @input="onUsernameInput()"
                                     v-model="username"
                                 />
                             </p>
-                            <p class="control">
+                            <p class="control" v-if="!isBusy && !isUserFound">
+                                <button
+                                    class="button is-primary is-large"
+                                    @click="findUser()"
+                                    :disabled="!hasUsername"
+                                >
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </p>
+                            <p class="control" v-if="!isBusy && isUserFound">
+                                <button
+                                    class="button is-info is-large"
+                                    @click="
+                                        isOptionsVisible = !isOptionsVisible
+                                    "
+                                    :disabled="!hasDomain || !hasUsername"
+                                >
+                                    <i class="fas fa-sliders-h"></i>
+                                </button>
+                            </p>
+                            <p class="control" v-if="!isBusy && isUserFound">
                                 <button
                                     class="button is-primary is-large"
                                     @click="getUserEntries()"
                                     :disabled="!hasDomain || !hasUsername"
-                                    v-show="!isBusy"
                                 >
-                                    kaydet
+                                    <i class="fas fa-cloud-download-alt"></i>
                                 </button>
+                            </p>
+                            <p class="control" v-if="isBusy && isUserFound">
                                 <button
                                     class="button is-warning is-large"
                                     @click="cancelRequest()"
-                                    v-show="isBusy"
                                 >
-                                    iptal
+                                    <i class="far fa-stop-circle"></i>
                                 </button>
                             </p>
                         </div>
-                        <span class="title is-size-5" v-if="hasUsername"
-                            >{{ profileUrl }}
-                            <a :href="'https://' + profileUrl" target="_blank">
-                                <i class="fas fa-external-link-alt"></i> </a
-                        ></span>
-                        <br />
-                        <span class="title is-size-6" v-if="hasUsername">{{
-                            progress.userinfo
-                        }}</span>
+
+                        <div v-if="isOptionsVisible">
+                            <div class="field has-addons">
+                                <p class="control has-text-info p-2 is-size-5">
+                                    sayfa aralığı
+                                </p>
+                                <p class="control is-small">
+                                    <input
+                                        class="input has-text-white has-background-link-dark"
+                                        style="text-align: center"
+                                        type="number"
+                                        :max="metadata.totalPageCount - 1"
+                                        min="1"
+                                        v-model.number="selectedStartPage"
+                                        placeholder="başlangıç"
+                                    />
+                                </p>
+                                <p class="control p-2">
+                                    <i
+                                        class="fas fa-arrows-alt-h is-size-4"
+                                    ></i>
+                                </p>
+                                <p class="control is-small">
+                                    <input
+                                        class="input has-text-white has-background-link-dark"
+                                        style="text-align: center"
+                                        type="number"
+                                        :max="metadata.totalPageCount"
+                                        min="1"
+                                        v-model.number="selectedEndPage"
+                                        placeholder="bitiş"
+                                    />
+                                </p>
+                                <p class="control p-2">&nbsp;</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-if="isUserFound" class="has-text-primary p-4">
+                        <p>
+                            <span class="is-size-4"
+                                >{{ profileUrl }}
+                                <a
+                                    :href="'https://' + profileUrl"
+                                    target="_blank"
+                                >
+                                    <i class="fas fa-external-link-alt"></i> </a
+                            ></span>
+                        </p>
+                        <p class="mt-2">
+                            <span class="is-size-6">{{
+                                metadata.userinfo
+                            }}</span>
+                        </p>
+                        <p class="mt-2">
+                            <span
+                                >{{ metadata.totalPageCount }} sayfada toplam
+                                {{ metadata.totalEntryCount }} entry var</span
+                            >
+                        </p>
                     </div>
 
                     <div v-if="isError">
@@ -83,12 +154,17 @@
                     <div v-if="isBusy">
                         <p class="my-4">
                             <span
-                                >sayfa # {{ progress.currentPage }} /
-                                {{ progress.maxPage }} </span
-                            ><br />
+                                >sayfa #{{ progress.currentPage }} @
+                                {{
+                                    progress.currentPage - selectedStartPage + 1
+                                }}
+                                /
+                                {{ selectedEndPage - selectedStartPage + 1 }}
+                            </span>
+                            <span class="px-4">•</span>
                             <span
-                                >entry # {{ progress.entryCount }} /
-                                {{ progress.maxEntryCount }}</span
+                                >entry {{ progress.entryCount }} /
+                                {{ metadata.totalEntryCount }}</span
                             >
                         </p>
 
@@ -120,17 +196,25 @@
                     <div v-if="isDownloadReady">
                         <p class="my-3">
                             <i class="fas fa-check-circle mx-1"></i>
-                            <span class="px-1"
-                                ><b>{{ progress.maxPage }}</b> sayfada
-                                <b>{{ progress.entryCount }}</b> entry
+                            <span class="px-1">
+                                <span v-if="hasPageSelection"
+                                    >seçilen
+                                    <b>{{
+                                        selectedEndPage - selectedStartPage + 1
+                                    }}</b></span
+                                >
+                                <span v-if="!hasPageSelection">{{
+                                    metadata.totalPageCount
+                                }}</span>
+                                sayfada <b>{{ progress.entryCount }}</b> entry
                                 yedeklendi.
                             </span>
                         </p>
 
                         <p class="my-3">
                             <i class="fas fa-file-export mx-1"></i>
-                            <span class="px-1">
-                                dosyaları aşağıdaki bağlantılardan
+                            <span class="px-1"
+                                >dosyaları aşağıdaki bağlantılardan
                                 indirebilirsiniz.
                                 <br />
                                 <i class="has-text-warning"
@@ -161,7 +245,7 @@
 </template>
 
 <script>
-import { downloadUserEntries } from "../parser";
+import { downloadUserEntries, fetchMetadata } from "../parser";
 
 const _domains = [
     {
@@ -169,6 +253,7 @@ const _domains = [
         title: "uludağ sözlük",
         host: "uludagsozluk.com",
         urlTemplate: "https://[USER].uludagsozluk.com/&p=[PAGE]#",
+        pageSize: 20,
     },
 ];
 
@@ -176,9 +261,22 @@ const _progress = {
     currentPage: 0,
     maxPage: 0,
     value: 0,
-    userinfo: "",
     entryCount: 0,
-    maxEntryCount: 0,
+    totalEntryCount: 0,
+};
+
+const _metadata = {
+    url: "",
+    error: "",
+    totalEntryCount: 0,
+    totalPageCount: 0,
+    userinfo: "",
+};
+
+const _stats = {
+    queue: -1,
+    active: -1,
+    line: -1,
 };
 
 export default {
@@ -187,18 +285,23 @@ export default {
         return {
             sid: null,
             isBusy: false,
+            isUserFound: false,
             isCompleted: false,
             isCancelled: false,
             isError: false,
+            isOptionsVisible: false,
             isPreparingFiles: false,
             isDownloadReady: false,
             errorMessage: null,
-            progress: Object.assign({}, _progress),
             domains: _domains,
             selectedDomainId: "uludag",
+            selectedStartPage: -1,
+            selectedEndPage: -1,
             username: null,
             renderResult: null,
-            stats: {},
+            stats: Object.assign({}, _stats),
+            progress: Object.assign({}, _progress),
+            metadata: Object.assign({}, _metadata),
         };
     },
     sockets: {
@@ -244,12 +347,19 @@ export default {
             console.log(this.sid);
             return process.env.VUE_APP_API_HOST || "";
         },
+        hasPageSelection() {
+            return (
+                this.selectedStartPage !== 1 ||
+                this.selectedEndPage !== this.metadata.totalPageCount
+            );
+        },
     },
     methods: {
-        resetState(keepProgress) {
-            if (!keepProgress) {
-                this.progress = Object.assign({}, _progress);
-            }
+        onUsernameInput() {
+            this.reset();
+        },
+
+        resetState() {
             this.isCompleted = false;
             this.isBusy = false;
             this.isError = false;
@@ -257,28 +367,78 @@ export default {
             this.isPreparingFiles = false;
             this.isDownloadReady = false;
             this.renderResult = null;
+            this.isOptionsVisible = false;
+        },
+
+        resetProgress() {
+            this.progress = Object.assign({}, _progress);
+        },
+
+        resetMetadata() {
+            this.metadata = Object.assign({}, _metadata);
+            this.isUserFound = false;
+            this.selectedStartPage = -1;
+            this.selectedEndPage = -1;
         },
 
         resetCancellation() {
             this.isCancelled = false;
         },
 
+        reset(...target) {
+            target = target || [];
+
+            if (target.indexOf("state") > -1 || target.length === 0) {
+                this.resetState();
+            }
+            if (target.indexOf("metadata") > -1 || target.length === 0) {
+                this.resetMetadata();
+            }
+            if (target.indexOf("progress") > -1 || target.length === 0) {
+                this.resetProgress();
+            }
+            if (target.indexOf("cancellation") > -1 || target.length === 0) {
+                this.resetCancellation();
+            }
+        },
+
+        async findUser() {
+            this.reset();
+
+            const result = await fetchMetadata({
+                urlTemplate: this.selectedDomain.urlTemplate,
+                username: this.sanitizedUsername,
+            });
+
+            if (result.error) {
+                this.isError = true;
+                this.errorMessage = result.error;
+                this.isUserFound = false;
+            } else {
+                this.isUserFound = true;
+                this.metadata = result;
+                this.selectedStartPage = 1;
+                this.selectedEndPage = result.totalPageCount;
+            }
+        },
+
         async getUserEntries() {
-            this.resetState();
-            this.resetCancellation();
+            this.reset("state", "progress", "cancellation");
             this.isBusy = true;
 
-            let result = await downloadUserEntries(
+            const result = await downloadUserEntries(
                 {
                     urlTemplate: this.selectedDomain.urlTemplate,
                     username: this.sanitizedUsername,
+                    startPage: this.selectedStartPage,
+                    endPage: this.selectedEndPage,
                 },
                 this.onProgressUpdate,
                 this.cancellationHandle
             );
 
             if (result.error) {
-                this.resetState();
+                this.reset("state", "progress");
                 this.isError = true;
                 this.errorMessage = result.error;
             }
@@ -291,15 +451,15 @@ export default {
         onProgressUpdate(data) {
             this.progress = Object.assign(
                 {
-                    value: (data.currentPage * 100) / data.maxPage,
+                    value: this.calculateProgressValue(data.currentPage),
                 },
                 data
             );
 
             this.$socket.client.emit("onSyncChunk", data.entries);
 
-            if (this.progress.currentPage === this.progress.maxPage) {
-                this.resetState(true);
+            if (this.progress.currentPage === this.selectedEndPage) {
+                this.reset("state");
                 this.isCompleted = true;
                 this.beginRender();
                 return;
@@ -321,8 +481,15 @@ export default {
             this.isPreparingFiles = true;
             this.$socket.client.emit("onBeginRender", {
                 username: this.username,
-                userinfo: this.progress.userinfo,
+                userinfo: this.metadata.userinfo,
             });
+        },
+
+        calculateProgressValue(currentPage) {
+            return (
+                ((currentPage - this.selectedStartPage + 1) * 100) /
+                (this.selectedEndPage - this.selectedStartPage + 1)
+            );
         },
     },
 };
