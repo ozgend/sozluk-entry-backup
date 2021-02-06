@@ -27,7 +27,7 @@ const contentMappingOptions = {
             content: 'a'
         }
     },
-    maxEntryCount: 'div.user-menu-under-in > ul.nav > li:first-child > a',
+    totalEntryCount: 'div.user-menu-under-in > ul.nav > li:first-child > a',
     userinfo: 'div.head-info-bar',
     error: 'div.alert'
 };
@@ -49,36 +49,38 @@ const parsePage = async (urlTemplate, username, page) => {
             url,
             page,
             entries: [],
-            maxEntryCount: 0,
-            availableMaxPage: -1,
+            totalEntryCount: 0,
+            endPage: -1,
             error: response.data.error.split('!')[0],
             userinfo: '',
         };
     }
 
     const entries = response.data.entries;
-    const maxEntryCount = parseInt(response.data.maxEntryCount.replace(/\D/g, ''));
-    const availableMaxPage = response.data.pages.map(p => parseInt(p.content)).filter(p => p > 0).pop();
+    const totalEntryCount = parseInt(response.data.totalEntryCount.replace(/\D/g, ''));
+    const totalPageCount = response.data.pages.map(p => parseInt(p.content)).filter(p => p > 0).pop();
     const userinfo = response.data.userinfo.replace(/[\r\n]\s+/g, '').trim();
 
     return {
         url,
         page,
         entries,
-        maxEntryCount,
-        availableMaxPage,
+        totalEntryCount,
+        totalPageCount,
         userinfo
     };
 };
 
 const downloadUserEntries = async (options, onProgressListener, cancellationHandle) => {
     options.startPage = options.startPage || 1;
+    options.endPage = options.endPage || 2;
     let currentPage = options.startPage;
-    options.maxPage = currentPage + 1;
     let entryCount = 0;
     let isCancelled = false;
 
-    while (currentPage <= options.maxPage && !isCancelled) {
+    console.table(options);
+
+    while (currentPage <= options.endPage && !isCancelled) {
         if (cancellationHandle) {
             isCancelled = cancellationHandle();
 
@@ -89,13 +91,6 @@ const downloadUserEntries = async (options, onProgressListener, cancellationHand
 
         const result = await parsePage(options.urlTemplate, options.username, currentPage);
 
-        if (options.pageLength) {
-            options.maxPage = options.startPage + options.pageLength;
-        }
-        else {
-            options.maxPage = result.availableMaxPage;
-        }
-
         entryCount = entryCount += result.entries.length;
 
         if (result.error) {
@@ -103,18 +98,23 @@ const downloadUserEntries = async (options, onProgressListener, cancellationHand
         }
 
         if (onProgressListener) {
-            onProgressListener({ currentPage, maxPage: options.maxPage, entries: result.entries, entryCount, maxEntryCount: result.maxEntryCount, userinfo: result.userinfo });
+            onProgressListener({ currentPage, entryCount, entries: result.entries });
         }
 
-        //console.debug(`++ parsed ${currentPage}/${options.maxPage} @ ${result.url}`);
+        // console.debug(`++ parsed ${currentPage}/${options.endPage} @ ${result.url}`);
 
-        if (currentPage == options.maxPage) {
-            //console.debug(`finished ${currentPage}/${options.maxPage}`);
-            return { completed: true, pageCount: options.maxPage, entryCount, userinfo: result.userinfo };
+        if (currentPage == options.endPage) {
+            // console.debug(`finished ${currentPage}/${options.endPage}`);
+            return { completed: true };
         }
 
         currentPage++;
     }
 };
 
-module.exports = { downloadUserEntries };
+const fetchMetadata = async (options) => {
+    const metadata = await parsePage(options.urlTemplate, options.username, 1);
+    return metadata;
+}
+
+module.exports = { downloadUserEntries, fetchMetadata };
